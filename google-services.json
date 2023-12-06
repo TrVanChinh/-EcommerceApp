@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "94539330946",
+    "project_id": "ecommerceapp-a636b",
+    "storage_bucket": "ecommerceapp-a636b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:94539330946:android:7cdead9faf6e44accf4b9b",
+        "android_client_info": {
+          "package_name": "com.chinhtran1005.EcommerceApp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "94539330946-d96h63a1g3lrbamoun2giogaa1ihnphn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.chinhtran1005.EcommerceApp",
+            "certificate_hash": "0554aa65c4368e706c3c94c01548ec989a216ff4"
+          }
+        },
+        {
+          "client_id": "94539330946-ss32c2pobmpontuegii4o988tdv077t2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.chinhtran1005.EcommerceApp",
+            "certificate_hash": "4d8aed1433b8c4e04bf5f7fe460460fa7bfd0de5"
+          }
+        },
+        {
+          "client_id": "94539330946-of6c7os8nnevt42emh65ijh16kbaojhp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrSjxB3L2UI9y4IfcfiFhyq1-8uMH5K7c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "94539330946-of6c7os8nnevt42emh65ijh16kbaojhp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
