@@ -36,17 +36,15 @@ const ProfileScreen = ({ navigation }) => {
                   right: -3,
                   backgroundColor: color.origin,
                   borderRadius: 10,
-                  borderColor:"white",
-                  borderWidth:1,
+                  borderColor: "white",
+                  borderWidth: 1,
                   width: 30,
                   height: 20,
                   justifyContent: "center",
                   alignItems: "center",
                 }}
               >
-                <Text style={{ color: "white", fontSize: 12 }}>
-                  99+
-                </Text>
+                <Text style={{ color: "white", fontSize: 12 }}>99+</Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.button}>
@@ -55,7 +53,7 @@ const ProfileScreen = ({ navigation }) => {
                 size={24}
                 color="white"
               />
-              
+
               <View
                 style={{
                   position: "absolute",
@@ -63,87 +61,108 @@ const ProfileScreen = ({ navigation }) => {
                   right: -3,
                   backgroundColor: color.origin,
                   borderRadius: 10,
-                  borderColor:"white",
-                  borderWidth:1,
+                  borderColor: "white",
+                  borderWidth: 1,
                   width: 30,
                   height: 20,
                   justifyContent: "center",
                   alignItems: "center",
                 }}
               >
-                <Text style={{ color: "white", fontSize: 12 }}>
-                  99+
-                </Text>
+                <Text style={{ color: "white", fontSize: 12 }}>99+</Text>
               </View>
             </TouchableOpacity>
           </View>
-          <View style={{ flexDirection: "row", padding: 15 }}>
+          <View style={{ flexDirection: "row" , justifyContent:'space-between'}}>
             <View
               style={{
-                borderRadius: 100,
-                backgroundColor: "white",
+                flexDirection: "row",
+                padding: 15,
               }}
             >
-              <Image
-                source={require("../assets/icon.png")}
-                style={styles.avt_image}
-              />
-            </View>
-            <View style={{ marginLeft: 10, justifyContent: "space-between" }}>
-              <Text
-                style={{ color: "white", fontWeight: "bold", fontSize: 17 }}
-              >
-                Username
-              </Text>
               <View
                 style={{
-                  flexDirection: "row",
-                  backgroundColor: "#d3ddde",
-                  paddingHorizontal: 3,
-                  borderRadius: 10,
-                  alignItems: "center",
+                  borderRadius: 100,
+                  backgroundColor: "white",
                 }}
               >
-                <Text
-                  style={{ color: "#424852", fontSize: 12, marginLeft: 10 }}
-                >
-                  Thành viên bạc
-                </Text>
-                <SimpleLineIcons
-                  marginLeft={15}
-                  padding={5}
-                  name="arrow-right"
-                  size={10}
-                  color="#60698a"
+                <Image
+                  source={require("../assets/icon.png")}
+                  style={styles.avt_image}
                 />
               </View>
-              <View style={{ flexDirection: "row" }}>
-                <Text style={{ color: "white", fontSize: 14 }}>
-                  Người theo dõi
-                </Text>
+              <View style={{ marginLeft: 10, justifyContent: "space-between" }}>
                 <Text
+                  style={{ color: "white", fontWeight: "bold", fontSize: 17 }}
+                >
+                  Username
+                </Text>
+                <View
                   style={{
-                    marginLeft: 5,
-                    color: "white",
-                    fontWeight: "bold",
-                    fontSize: 14,
+                    flexDirection: "row",
+                    backgroundColor: "#d3ddde",
+                    paddingHorizontal: 3,
+                    borderRadius: 10,
+                    alignItems: "center",
                   }}
                 >
-                  2
-                </Text>
+                  <Text
+                    style={{ color: "#424852", fontSize: 12, marginLeft: 10 }}
+                  >
+                    Thành viên bạc
+                  </Text>
+                  <SimpleLineIcons
+                    marginLeft={15}
+                    padding={5}
+                    name="arrow-right"
+                    size={10}
+                    color="#60698a"
+                  />
+                </View>
+                <View style={{ flexDirection: "row" }}>
+                  <Text style={{ color: "white", fontSize: 14 }}>
+                    Người theo dõi
+                  </Text>
+                  <Text
+                    style={{
+                      marginLeft: 5,
+                      color: "white",
+                      fontWeight: "bold",
+                      fontSize: 14,
+                    }}
+                  >
+                    2
+                  </Text>
+                </View>
+              </View>
+            </View>
+            <View>
+              <View
+                style={{
+                  flex: 1,
+                  marginRight:10,
+                  justifyContent:'center'
+                }}
+              >
+                {/* btn dang nhap */}
+                <TouchableOpacity
+                  style={styles.btn_login}
+                  onPress={() => navigation.navigate("Login")}
+                >
+                  <Text style={{ color: "white" }}>Đăng nhập</Text>
+                </TouchableOpacity>
+                {/* btn dang ki */}
+                <TouchableOpacity
+                  style={styles.btn_login}
+                  onPress={() => navigation.navigate("Register")}
+                >
+                  <Text style={{ color: "white" }}>Đăng kí</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
         </View>
         <View style={styles.lowerView}>
-          <Button
-            title="Go to Login"
-            onPress={() => navigation.navigate("Login")}
-          />
-          <Button
-            title="Go to Register"
-            onPress={() => navigation.navigate("Register")}
-          />
           <TouchableOpacity
             style={styles.list_items}
             onPress={() => navigation.navigate("Register Seller")}
@@ -179,6 +198,7 @@ const ProfileScreen = ({ navigation }) => {
               />
             </View>
           </TouchableOpacity>
+          {/* Them san pham */}
           <TouchableOpacity
             style={styles.list_items}
             onPress={() => navigation.navigate("AddProduct")}
@@ -197,6 +217,41 @@ const ProfileScreen = ({ navigation }) => {
                 color={color.origin}
               />
               <Text style={{ marginLeft: 10 }}> Đăng sản phẩm</Text>
+            </View>
+            <View
+              style={{
+                alignItems: "flex-end",
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <SimpleLineIcons
+                marginLeft={15}
+                name="arrow-right"
+                size={10}
+                color="#60698a"
+              />
+            </View>
+          </TouchableOpacity>
+          {/* Xem san pham */}
+          <TouchableOpacity
+            style={styles.list_items}
+            onPress={() => navigation.navigate("ListProducts")}
+          >
+            <View
+              style={{
+                alignItems: "flex-start",
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <AntDesign
+                name="inbox"
+                size={25}
+                marginLeft={10}
+                color={color.origin}
+              />
+              <Text style={{ marginLeft: 10 }}> Danh sách sản phẩm</Text>
             </View>
             <View
               style={{
@@ -247,6 +302,14 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
     marginHorizontal: 8,
+  },
+  btn_login: {
+    width: 100,
+    borderWidth: 1,
+    borderColor: "white",
+    alignItems: "center",
+    marginVertical: 10,
+    marginLeft: 10,
   },
   buttonText: {
     color: "white",

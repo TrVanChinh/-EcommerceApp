@@ -21,6 +21,9 @@ import {
   Ionicons,
   FontAwesome5,
 } from "@expo/vector-icons";
+import ListProducts from "../screens/Seller/ListProducts";
+
+
 const StackNavigator = () => {
   const Stack = createNativeStackNavigator();
   const Tab = createBottomTabNavigator();
@@ -156,6 +159,17 @@ const StackNavigator = () => {
         <Stack.Screen name="AddProduct" component={AddPrucductScreen}
           options={{
             headerTitle: "Thêm sản phẩm",
+            headerRight: () => (
+              <TouchableOpacity
+                onPress={() => alert('This is a button!')}
+              ><Text style={{color:color.origin, fontWeight:'bold'}}>Lưu</Text>
+              </TouchableOpacity>
+            ),
+          }} 
+        />
+        <Stack.Screen name="ListProducts" component={ListProducts}
+          options={{
+            headerTitle: "Danh sách sản phẩm",
             headerRight: () => (
               <TouchableOpacity
                 onPress={() => alert('This is a button!')}
