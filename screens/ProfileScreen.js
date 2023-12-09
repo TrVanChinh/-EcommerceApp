@@ -7,7 +7,7 @@ import {
   View,
   Image,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   Feather,
@@ -17,8 +17,54 @@ import {
   Ionicons,
 } from "@expo/vector-icons";
 import color from "../components/color";
+import auth from "@react-native-firebase/auth";
 
 const ProfileScreen = ({ navigation }) => {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = auth().onAuthStateChanged((authenticatedUser) => {
+      setUser(authenticatedUser);
+    });
+
+    // Hủy người nghe khi component unmount
+    return () => unsubscribe();
+  }, []);
+
+  const renderContent = () => {
+    return (
+      <View
+        style={{
+          flex: 1,
+          marginRight: 10,
+          justifyContent: "center",
+        }}
+      >
+        {/* btn dang nhap */}
+        <TouchableOpacity
+          style={styles.btn_login}
+          onPress={() => navigation.navigate("Login")}
+        >
+          <Text style={{ color: "white" }}>Đăng nhập</Text>
+        </TouchableOpacity>
+        {/* btn dang ki */}
+        <TouchableOpacity
+          style={styles.btn_login}
+          onPress={() => navigation.navigate("Register")}
+        >
+          <Text style={{ color: "white" }}>Đăng kí</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  const handleLogout = () => {
+    auth()
+      .signOut()
+      .then(() => console.log("User signed out!"))
+      .catch((error) => alert("Vui lòng đăng nhập trước"));
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView>
@@ -73,7 +119,9 @@ const ProfileScreen = ({ navigation }) => {
               </View>
             </TouchableOpacity>
           </View>
-          <View style={{ flexDirection: "row" , justifyContent:'space-between'}}>
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
             <View
               style={{
                 flexDirection: "row",
@@ -136,29 +184,33 @@ const ProfileScreen = ({ navigation }) => {
                 </View>
               </View>
             </View>
-            <View>
-              <View
-                style={{
-                  flex: 1,
-                  marginRight:10,
-                  justifyContent:'center'
-                }}
-              >
-                {/* btn dang nhap */}
-                <TouchableOpacity
-                  style={styles.btn_login}
-                  onPress={() => navigation.navigate("Login")}
-                >
-                  <Text style={{ color: "white" }}>Đăng nhập</Text>
-                </TouchableOpacity>
-                {/* btn dang ki */}
-                <TouchableOpacity
-                  style={styles.btn_login}
-                  onPress={() => navigation.navigate("Register")}
-                >
-                  <Text style={{ color: "white" }}>Đăng kí</Text>
-                </TouchableOpacity>
-              </View>
+            <View
+              style={{
+                flex: 1,
+                marginRight: 10,
+                justifyContent: "center",
+              }}
+            >
+              {user ? (
+                <View />
+              ) : (
+                <>
+                  {/* btn dang nhap */}
+                  <TouchableOpacity
+                    style={styles.btn_login}
+                    onPress={() => navigation.navigate("Login")}
+                  >
+                    <Text style={{ color: "white" }}>Đăng nhập</Text>
+                  </TouchableOpacity>
+                  {/* btn dang ki */}
+                  <TouchableOpacity
+                    style={styles.btn_login}
+                    onPress={() => navigation.navigate("Register")}
+                  >
+                    <Text style={{ color: "white" }}>Đăng kí</Text>
+                  </TouchableOpacity>
+                </>
+              )}
             </View>
           </View>
         </View>
@@ -268,6 +320,8 @@ const ProfileScreen = ({ navigation }) => {
               />
             </View>
           </TouchableOpacity>
+
+          <Button title="Logout" onPress={handleLogout} disabled={!user}/>
         </View>
       </ScrollView>
     </SafeAreaView>
