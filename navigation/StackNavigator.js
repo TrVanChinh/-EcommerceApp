@@ -11,8 +11,10 @@ import LiveScreen from "../screens/LiveScreen";
 import NotificationScreen from "../screens/NotificationScreen";
 import VideoScreen from "../screens/VideoScreeen";
 import RegisterSellerScreen from "../screens/Seller/RegisterSellerScreen";
-import color from "../components/color";
 import AddPrucductScreen from "../screens/Seller/AddPrucductScreen";
+import MyShopScreen from "../screens/Seller/MyShopScreen";
+import color from "../components/color";
+
 import {
   Entypo,
   AntDesign,
@@ -170,6 +172,17 @@ const StackNavigator = () => {
         <Stack.Screen name="ListProducts" component={ListProducts}
           options={{
             headerTitle: "Danh sách sản phẩm",
+            headerRight: () => (
+              <TouchableOpacity
+                onPress={() => alert('This is a button!')}
+              ><Text style={{color:color.origin, fontWeight:'bold'}}>Lưu</Text>
+              </TouchableOpacity>
+            ),
+          }} 
+        />
+        <Stack.Screen name="MyShop" component={MyShopScreen}
+          options={{
+            headerTitle: "Cửa hàng",
             headerRight: () => (
               <TouchableOpacity
                 onPress={() => alert('This is a button!')}
