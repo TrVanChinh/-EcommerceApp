@@ -48,7 +48,7 @@ const ProfileScreen = ({ navigation }) => {
   const getUser = async (authenticatedUser) => {
     const docRef = doc(db, "user", authenticatedUser.uid);
     const docSnap = await getDoc(docRef);
-    // console.log(docSnap.data());
+    // console.log(docSnap.id);
     setUser(docSnap.data());
   };
 
@@ -66,9 +66,11 @@ const ProfileScreen = ({ navigation }) => {
       <ScrollView>
         <View style={styles.upperView}>
           <View style={styles.buttonContainer}>
+            {/* nut cai dat */}
             <TouchableOpacity style={styles.button}>
               <Feather name="settings" size={24} color="white" />
             </TouchableOpacity>
+            {/* nut gio hang */}
             <TouchableOpacity style={styles.button}>
               <AntDesign name="shoppingcart" size={25} color="white" />
               <View
@@ -89,6 +91,7 @@ const ProfileScreen = ({ navigation }) => {
                 <Text style={{ color: "white", fontSize: 12 }}>99+</Text>
               </View>
             </TouchableOpacity>
+            {/* nut nhan tin */}
             <TouchableOpacity style={styles.button}>
               <Ionicons
                 name="chatbox-ellipses-outline"
@@ -305,78 +308,6 @@ const ProfileScreen = ({ navigation }) => {
           </TouchableOpacity>
 
           </>}
-
-        
-          {/* Them san pham */}
-          <TouchableOpacity
-            style={styles.list_items}
-            onPress={() => navigation.navigate("AddProduct")}
-          >
-            <View
-              style={{
-                alignItems: "flex-start",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <AntDesign
-                name="pluscircleo"
-                size={25}
-                marginLeft={10}
-                color={color.origin}
-              />
-              <Text style={{ marginLeft: 10 }}> Đăng sản phẩm</Text>
-            </View>
-            <View
-              style={{
-                alignItems: "flex-end",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <SimpleLineIcons
-                marginLeft={15}
-                name="arrow-right"
-                size={10}
-                color="#60698a"
-              />
-            </View>
-          </TouchableOpacity>
-          {/* Xem san pham */}
-          <TouchableOpacity
-            style={styles.list_items}
-            onPress={() => navigation.navigate("ListProducts")}
-          >
-            <View
-              style={{
-                alignItems: "flex-start",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <AntDesign
-                name="inbox"
-                size={25}
-                marginLeft={10}
-                color={color.origin}
-              />
-              <Text style={{ marginLeft: 10 }}> Danh sách sản phẩm</Text>
-            </View>
-            <View
-              style={{
-                alignItems: "flex-end",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <SimpleLineIcons
-                marginLeft={15}
-                name="arrow-right"
-                size={10}
-                color="#60698a"
-              />
-            </View>
-          </TouchableOpacity>
 
           <Button title="Logout" onPress={handleLogout} disabled={!isLogin} />
         </View>

@@ -1,10 +1,11 @@
-import { Alert, FlatList, StyleSheet, Text, View } from "react-native";
+import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import { db } from "../../firebaseConfig";
-import { collection, getDocs, where, query } from "firebase/firestore";
+import { collection, getDocs, where, query, doc } from "firebase/firestore";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Image } from "react-native-elements";
 import auth from "@react-native-firebase/auth";
+import { FirebaseFirestoreTypes } from "@react-native-firebase/firestore";
 //idUserTuong:SGRmRvN7t2aKv4ylKAmqs0Llbnr1
 
 const ListProducts = ({ navigation }) => {
@@ -40,16 +41,28 @@ const ListProducts = ({ navigation }) => {
     const userId = authenticatedUser.uid;
     const q = query(collection(db, "product"), where("idShop", "==", userId));
     const querySnapshot = await getDocs(q);
-    // const querySnapshot = await query.get();
-    const products = querySnapshot.docs.map((doc) => doc.data());
-    setProducts(products);
-  };
+    const listproducts = [];
+    const promises = querySnapshot.docs.map(async (a) => {
+      // console.log(a.id, " => ", a.data().name);
 
-  const handleLogout = () => {
-    auth()
-      .signOut()
-      .then(() => console.log("User signed out!"))
-      .catch((error) => console.error("Error signing out:", error));
+      const val = doc(db, "product", a.id);
+      const cltImg = collection(val, "image");
+      const getValue = await getDocs(cltImg);
+      const idProduct = a.id;
+      const nameProduct = a.data().name;
+      const priceProduct = a.data().price;
+      const imageProduct = getValue.docs[0].data().url;
+      const prdOject = {
+        idProduct,
+        nameProduct,
+        imageProduct,
+        priceProduct,
+      };
+      listproducts.push(prdOject);
+      // console.log(idProduct,nameProduct,imageProduct,"price: ",price);
+    });
+    await Promise.all(promises);
+    setProducts(listproducts);
   };
 
   return (
@@ -57,35 +70,27 @@ const ListProducts = ({ navigation }) => {
       <FlatList
         data={products}
         renderItem={({ item }) => (
-          <View
-            key={item.id}
-            style={styles.item_prd}
-          >
+          <TouchableOpacity key={item.id} style={styles.item_prd}>
             <Image
               source={{
-                uri: item.photo,
+                uri: item.imageProduct,
               }}
               style={[styles.prd_image, { flex: 1 }]}
             />
             <View style={{ flex: 9, justifyContent: "space-between" }}>
-              <Text style={[styles.name_prd]}>{item.name}</Text>
+              <Text style={[styles.name_prd]}>{item.nameProduct}</Text>
               <View
                 style={{
                   flexDirection: "row",
                   justifyContent: "flex-end",
                 }}
               >
-                <Text
-                  style={styles.prd_price}
-                >
-                  {item.price} vnđ
-                </Text>
+                <Text style={styles.prd_price}>{item.priceProduct} vnđ</Text>
               </View>
             </View>
-          </View>
+          </TouchableOpacity>
         )}
       />
-      <Button title="Logout" onPress={handleLogout} />
     </SafeAreaView>
   );
 };
@@ -102,7 +107,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
-  item_prd:{
+  item_prd: {
     flexDirection: "row",
     flex: 1,
     backgroundColor: "white",
@@ -118,10 +123,10 @@ const styles = StyleSheet.create({
     padding: 5,
     margin: 5,
   },
-  prd_price:{
+  prd_price: {
     fontWeight: "bold",
     marginBottom: 10,
     marginRight: 10,
     color: "red",
-  }
+  },
 });
