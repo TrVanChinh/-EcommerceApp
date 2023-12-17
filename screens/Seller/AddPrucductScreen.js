@@ -18,22 +18,112 @@ import {
   SimpleLineIcons,
   Entypo,
   AntDesign,
-  Ionicons,Octicons
+  Ionicons,
+  Octicons,
 } from "@expo/vector-icons";
+import auth from "@react-native-firebase/auth";
+import { doc, setDoc, addDoc, collection, getDocs } from "firebase/firestore";
+import { db } from "../../firebaseConfig";
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytes,
+  uploadBytesResumable,
+} from "firebase/storage";
 
-const AddProductScreen = () => {
+const AddProductScreen = ({ navigation, route }) => {
   const [name, onchangeProductName] = useState("");
   const [descript, onchangeProductDes] = useState("");
   const [images, setImages] = useState([]);
   const [selectedImages, setSelectedImages] = useState([]);
+  const [urlImage, setUrlImage] = useState([]);
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("");
+  const [userId, setUser] = useState(null);
+  const storage = getStorage();
+  const [categories, setCategory] = useState([]);
+  const { idSubcategory, nameSubcategory } = route.params || {};
+
+  useEffect(() => {
+    const unsubscribe = auth().onAuthStateChanged((authenticatedUser) => {
+      setUser(authenticatedUser.uid);
+    });
+    getCategorytList();
+    // Hủy người nghe khi component unmount
+    return () => unsubscribe();
+  }, []);
+
+  const getCategorytList = async () => {
+    setCategory([]);
+    const list = [];
+    const docSnap = await getDocs(collection(db, "category"));
+    docSnap.forEach((doc) => {
+      idCate = doc.id;
+      nameCate = doc.data().name;
+      photo = doc.data().photo;
+      const cateOject = {
+        idCate,
+        nameCate,
+        photo,
+      };
+      list.push(cateOject);
+      // console.log(doc.id, " => ", doc.data());
+    });
+
+    setCategory((preCate) => [...preCate, ...list]);
+
+    // console.log(categories)
+  };
+  const areInputsFilled = (inputValues) => {
+    for (const value of inputValues) {
+      if (!value || value.trim() === "") {
+        return false; // Nếu một trong các thẻ input chưa nhập, trả về false
+      }
+    }
+    return true; // Nếu tất cả các thẻ input đã được nhập, trả về true
+  };
+
+  const addProduct = async (downloadURLs) => {
+    const productRef = await addDoc(collection(db, "product"), {
+      name: name,
+      price: price,
+      description: descript,
+      idShop: userId,
+      quantity: quantity,
+      sold: 0,
+      idSubCategory: idSubcategory,
+      discount: "",
+    });
+    console.log("Document written with ID: ", productRef.id);
+    const productId = productRef.id;
+
+    const imageCollectionRef = collection(db, "product", productId, "image");
+
+    // Thêm mỗi URL hình ảnh vào subcollection "images"
+    downloadURLs.forEach(async (url) => {
+      await addDoc(collection(db, "product", productId, "image"), {
+        url: url,
+        // order: index + 1, // Để duy trì thứ tự của các hình ảnh
+      });
+    });
+
+    Alert.alert("Thông báo", "Sản phẩm đã được thêm thành công", [
+      {
+        text: "OK",
+        onPress: () => {
+          navigation.navigate("MyShop");
+        },
+      },
+    ]);
+  };
 
   const pickImages = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsMultipleSelection: true,
       aspect: [4, 3],
+      base64: true,
       quality: 1,
     });
 
@@ -49,8 +139,76 @@ const AddProductScreen = () => {
     }
   };
 
+  const createProduct = async() => {
+    const inputValues = [name, price, descript, quantity, idSubcategory];
+    const inputsFilled = areInputsFilled(inputValues);
+
+    if (images.length === 0) {
+      Alert.alert("Thông báo", "Chưa thêm ảnh");
+    } else if (inputsFilled) {
+      uploadImage();
+    } else {
+      Alert.alert("Thông báo", "Chưa nhập đủ thông tin");
+    }
+  };
+
+  const uploadImage = async () => {
+    const storageRef = ref(storage, "productImg");
+
+    const getCurrentTimestamp = () => {
+      const date = new Date();
+      return `${date.getFullYear()}${(date.getMonth() + 1)
+        .toString()
+        .padStart(2, "0")}${date.getDate().toString().padStart(2, "0")}_${date
+        .getHours()
+        .toString()
+        .padStart(2, "0")}${date.getMinutes().toString().padStart(2, "0")}${date
+        .getSeconds()
+        .toString()
+        .padStart(2, "0")}`;
+    };
+
+    const uploadTasks = images.map(async (uri, index) => {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+
+      // Construct a unique filename based on the index (you might want to use a more meaningful name)
+      const filename = userId + `_${index + 1}_${getCurrentTimestamp()}.jpg`;
+
+      // Create a reference to the new file in Firebase Storage
+      const imageRef = ref(storageRef, filename);
+
+      const snapshot = await uploadBytesResumable(imageRef, blob);
+      return snapshot.ref;
+    });
+
+    try {
+      // Wait for all upload tasks to complete
+      const uploadSnapshots = await Promise.all(uploadTasks);
+
+      // Get download URLs for each uploaded image
+      const downloadURLs = await Promise.all(
+        uploadSnapshots.map((snapshot) => getDownloadURL(snapshot))
+      );
+      // Log the download URLs
+      const list = [];
+      downloadURLs.forEach((url, index) => {
+        setUrlImage((prevUrlImage) => [...prevUrlImage, url]);
+        
+        // console.log(`Download URL ${index + 1}: ${url}`);
+      });
+      // console.log(`Download URL: `,urlImage);
+      console.log("Tất cả ảnh đã được upload.");
+
+      addProduct(downloadURLs);
+      setSelectedImages([]);
+      setImages([]);
+    } catch (error) {
+      console.error("Error uploading images:", error.message);
+    }
+  };
   const handleImagePress = (index) => {
-    // Khi người dùng nhấn vào ảnh, thêm hoặc xóa ảnh khỏi danh sách đã chọn
+    // Khi người dùng nhấn vào ảnh, xóa ảnh khỏi danh sách đã chọn
     const isSelected = selectedImages.includes(index);
     const updatedSelectedImages = isSelected
       ? selectedImages.filter((selectedIndex) => selectedIndex !== index)
@@ -169,15 +327,21 @@ const AddProductScreen = () => {
           <Text style={{ color: "red" }}>*</Text>
         </View>
         <TextInput
-          style={styles.input}
+          style={[styles.input]}
           onChangeText={onchangeProductDes}
+          multiline
           placeholder="Nhập mô tả sản phẩm"
           value={descript}
         />
       </View>
 
       {/* Danh muc */}
-      <TouchableOpacity style={[styles.list_items, { marginVertical: 5 }]}>
+      <TouchableOpacity
+        onPress={() =>
+          navigation.navigate("SelectCategory", { categories: categories })
+        }
+        style={[styles.list_items, { marginVertical: 5 }]}
+      >
         <View
           style={{
             alignItems: "flex-start",
@@ -186,7 +350,7 @@ const AddProductScreen = () => {
           }}
         >
           <Ionicons name="list" size={25} marginLeft={10} color="gray" />
-          <Text style={{ marginLeft: 10 }}> Danh mục sản phẩm </Text>
+          <Text style={{ marginLeft: 10 }}> Danh mục </Text>
         </View>
         <View
           style={{
@@ -195,6 +359,7 @@ const AddProductScreen = () => {
             alignItems: "center",
           }}
         >
+          <Text style={{ marginLeft: 10 }}> {nameSubcategory}</Text>
           <SimpleLineIcons
             marginLeft={15}
             name="arrow-right"
@@ -222,7 +387,7 @@ const AddProductScreen = () => {
           <Text style={{ marginLeft: 10 }}> Giá </Text>
         </View>
         <TextInput
-          style={{marginRight:5, textAlign:'right'}}
+          style={{ marginRight: 5, textAlign: "right" }}
           placeholder="Thiết lập giá"
           keyboardType="numeric"
           value={price}
@@ -238,22 +403,37 @@ const AddProductScreen = () => {
             alignItems: "center",
           }}
         >
-          <Octicons
-            name="stack"
-            size={25}
-            marginLeft={10}
-            color="gray"
-          />
+          <Octicons name="stack" size={25} marginLeft={10} color="gray" />
           <Text style={{ marginLeft: 10 }}> Kho hàng </Text>
         </View>
         <TextInput
-          style={{marginRight:5, textAlign:'right'}}
+          style={{ marginRight: 5, textAlign: "right" }}
           placeholder="Nhập số lượng sản phẩm"
           keyboardType="numeric"
           value={quantity}
           onChangeText={handleQuantityChange}
         />
       </View>
+      <TouchableOpacity
+        style={{ backgroundColor: color.origin, marginHorizontal: 100 }}
+        onPress={uploadImage}
+      >
+        <View
+          style={{ alignItems: "center", justifyContent: "center", height: 35 }}
+        >
+          <Text style={{ color: "white" }}>Up img</Text>
+        </View>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={{ backgroundColor: color.origin, marginHorizontal: 100 }}
+        onPress={addProduct}
+      >
+        <View
+          style={{ alignItems: "center", justifyContent: "center", height: 35 }}
+        >
+          <Text style={{ color: "white" }}>Thêm sản phẩm</Text>
+        </View>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -270,7 +450,7 @@ const styles = StyleSheet.create({
   },
   list_items: {
     backgroundColor: "white",
-    marginBottom:5,
+    marginBottom: 5,
     padding: 10,
     flexDirection: "row",
     justifyContent: "space-between",

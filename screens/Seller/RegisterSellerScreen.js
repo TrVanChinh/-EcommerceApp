@@ -1,26 +1,75 @@
-import { StyleSheet, Text, View, TextInput } from "react-native";
-import React from "react";
+import { StyleSheet, Text, View, TextInput, Alert } from "react-native";
+import React, { useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { SimpleLineIcons, Entypo } from "@expo/vector-icons";
 import { Button } from "react-native-elements";
 import color from "../../components/color";
-const RegisterSellerScreen = () => {
-  
-  const [shopName, onChangeShopName] = React.useState("FurinShop");
-  const [address, onChangeText] = React.useState(
-    "48 Thanh Bình Hải Châu Đà Nẵng"
-  );
-  const [email, onChangeEmail] = React.useState("abc@gmail.com");
-  const [phone, onChangePhone] = React.useState("09123456789");
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  getFirestore,
+  query,
+  updateDoc,
+} from "firebase/firestore";
+const RegisterSellerScreen = ({ navigation, route }) => {
+  const [shopName, onChangeShopName] = useState("");
+  const [address, onChangeText] = useState("");
+  const [email, onChangeEmail] = useState("");
+  const [phone, onChangePhone] = useState("");
+  const { idUser: idUser } = route.params || {};
+  const db = getFirestore();
+
+  const setToSeller = async () => {
+    try {
+      if (shopName === "") {
+        alert("Chưa nhập tên cửa hàng");
+      } else if (address === "") {
+        alert("Chưa nhập địa chỉ");
+      } else {
+        const docRef = doc(db, "user", idUser);
+
+        await updateDoc(docRef, {
+          seller: true,
+          address: address,
+          shopName: shopName,
+        });
+        const updatedDocSnap = await getDoc(docRef);
+
+        if (updatedDocSnap.exists()) {
+          const isSeller = updatedDocSnap.data().seller;
+
+          if (isSeller) {
+            // Hiển thị thông báo nếu cập nhật thành công
+            Alert.alert("Thông báo", "Đăng ký bán hàng thành công", [
+              {
+                text: "OK",
+                onPress: () => {
+                  navigation.popToTop();
+                },
+              },
+            ]);
+          } else {
+            console.error(
+              "Cập nhật không thành công. Trường 'seller' không phải là true."
+            );
+          }
+        } else {
+          console.error("Dữ liệu không tồn tại sau khi cập nhật.");
+        }
+      }
+    } catch (error) {
+      console.error("Lỗi khi cập nhật:", error);
+    }
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <View style={{ flex: 8 }}>
-
         <View style={styles.list_items}>
           <View style={{ flexDirection: "row" }}>
-            <Text style={{ marginLeft: 10, fontSize: 16 }}>
-              Tên cửa hàng
-            </Text>
+            <Text style={{ marginLeft: 10, fontSize: 16 }}>Tên cửa hàng</Text>
             <Text style={{ color: "red" }}>*</Text>
           </View>
           <TextInput
@@ -69,7 +118,7 @@ const RegisterSellerScreen = () => {
       </View>
 
       <View style={{}}>
-        <Button title="Đăng kí" color={color.origin} />
+        <Button title="Đăng kí" color={color.origin} onPress={setToSeller} />
       </View>
     </View>
   );

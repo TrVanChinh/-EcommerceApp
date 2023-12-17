@@ -6,6 +6,7 @@ import {
   ScrollView,
   View,
   Image,
+  Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -27,23 +28,39 @@ import {
   query,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
+import { useFocusEffect } from "@react-navigation/native";
 
 const ProfileScreen = ({ navigation }) => {
   const [isLogin, setLogin] = useState(null);
   const [user, setUser] = useState(null);
-  useEffect(() => {
-    const unsubscribe = auth().onAuthStateChanged((authenticatedUser) => {
-      setLogin(authenticatedUser);
-      // console.log(isLogin);
-      if (authenticatedUser) {
-        // Nếu user không null, tiến hành lấy dữ liệu
-        getUser(authenticatedUser);
-      }
-    });
+  // useEffect(() => {
+  //   const unsubscribe = auth().onAuthStateChanged((authenticatedUser) => {
+  //     setLogin(authenticatedUser);
+  //     // console.log(isLogin);
+  //     if (authenticatedUser) {
+  //       // Nếu user không null, tiến hành lấy dữ liệu
+  //       getUser(authenticatedUser);
+  //     }
+  //   });
 
-    // Hủy người nghe khi component unmount
-    return () => unsubscribe();
-  }, []);
+  //   // Hủy người nghe khi component unmount
+  //   return () => unsubscribe();
+  // }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // Nếu màn hình được focus (được hiển thị), thực hiện các hành động cần thiết
+      const unsubscribe = auth().onAuthStateChanged((authenticatedUser) => {
+        setLogin(authenticatedUser);
+        if (authenticatedUser) {
+          getUser(authenticatedUser);
+        }
+      });
+
+      // Hủy người nghe khi màn hình không còn được focus
+      return () => unsubscribe();
+    }, [])
+  );
 
   const getUser = async (authenticatedUser) => {
     const docRef = doc(db, "user", authenticatedUser.uid);
@@ -52,13 +69,14 @@ const ProfileScreen = ({ navigation }) => {
     setUser(docSnap.data());
   };
 
- 
-
   const handleLogout = () => {
     auth()
       .signOut()
       .then(() => console.log("User signed out!"))
       .catch((error) => alert("Vui lòng đăng nhập trước"));
+    setLogin(null);
+    setUser(null);
+    navigation.navigate("Profile");
   };
 
   return (
@@ -122,82 +140,82 @@ const ProfileScreen = ({ navigation }) => {
             style={{ flexDirection: "row", justifyContent: "space-between" }}
           >
             {/* Area avt, username */}
-            {isLogin&&user ? (
+            {isLogin && user ? (
               <>
-              <View
-                style={{
-                  flexDirection: "row",
-                  padding: 15,
-                }}
-              >
                 <View
                   style={{
-                    borderRadius: 100,
-                    backgroundColor: "white",
+                    flexDirection: "row",
+                    padding: 15,
                   }}
                 >
-                  <Image
-                    source={{
-                      uri: user.photo,
-                    }}
-                    style={styles.avt_image}
-                  />
-                </View>
-                <View
-                  style={{ marginLeft: 10, justifyContent: "space-between" }}
-                >
-                  <Text
-                    style={{
-                      color: "white",
-                      fontWeight: "bold",
-                      fontSize: 17,
-                    }}
-                  >
-                    {user.name}
-                  </Text>
                   <View
                     style={{
-                      flexDirection: "row",
-                      backgroundColor: "#d3ddde",
-                      paddingHorizontal: 3,
-                      borderRadius: 10,
-                      alignItems: "center",
+                      borderRadius: 100,
+                      backgroundColor: "white",
                     }}
+                  >
+                    <Image
+                      source={{
+                        uri: user.photo,
+                      }}
+                      style={styles.avt_image}
+                    />
+                  </View>
+                  <View
+                    style={{ marginLeft: 10, justifyContent: "space-between" }}
                   >
                     <Text
                       style={{
-                        color: "#424852",
-                        fontSize: 12,
-                        marginLeft: 10,
-                      }}
-                    >
-                      Thành viên bạc
-                    </Text>
-                    <SimpleLineIcons
-                      marginLeft={15}
-                      padding={5}
-                      name="arrow-right"
-                      size={10}
-                      color="#60698a"
-                    />
-                  </View>
-                  <View style={{ flexDirection: "row" }}>
-                    <Text style={{ color: "white", fontSize: 14 }}>
-                      Người theo dõi
-                    </Text>
-                    <Text
-                      style={{
-                        marginLeft: 5,
                         color: "white",
                         fontWeight: "bold",
-                        fontSize: 14,
+                        fontSize: 17,
                       }}
                     >
-                      2
+                      {user.name}
                     </Text>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        backgroundColor: "#d3ddde",
+                        paddingHorizontal: 3,
+                        borderRadius: 10,
+                        alignItems: "center",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          color: "#424852",
+                          fontSize: 12,
+                          marginLeft: 10,
+                        }}
+                      >
+                        Thành viên bạc
+                      </Text>
+                      <SimpleLineIcons
+                        marginLeft={15}
+                        padding={5}
+                        name="arrow-right"
+                        size={10}
+                        color="#60698a"
+                      />
+                    </View>
+                    <View style={{ flexDirection: "row" }}>
+                      <Text style={{ color: "white", fontSize: 14 }}>
+                        Người theo dõi
+                      </Text>
+                      <Text
+                        style={{
+                          marginLeft: 5,
+                          color: "white",
+                          fontWeight: "bold",
+                          fontSize: 14,
+                        }}
+                      >
+                        2
+                      </Text>
+                    </View>
                   </View>
                 </View>
-              </View>                
               </>
             ) : (
               <>
@@ -207,6 +225,7 @@ const ProfileScreen = ({ navigation }) => {
                     flex: 1,
                     justifyContent: "center",
                     alignItems: "center",
+                    flexDirection: "row",
                   }}
                 >
                   {/* btn dang nhap */}
@@ -229,85 +248,98 @@ const ProfileScreen = ({ navigation }) => {
           </View>
         </View>
         <View style={styles.lowerView}>
-        {user&&user.seller ? 
-          <>
-          {/* My shop */}
-          <TouchableOpacity
-            style={styles.list_items}
-            onPress={() => navigation.navigate("MyShop")}
-          >
-            <View
-              style={{
-                alignItems: "flex-start",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <Entypo
-                name="shop"
-                size={25}
-                marginLeft={10}
-                color={color.origin}
-              />
-              <Text style={{ marginLeft: 10 }}> Cửa hàng của tôi </Text>
-            </View>
-            <View
-              style={{ 
-                alignItems: "flex-end",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <Text> Xem </Text>
-              <SimpleLineIcons
-                marginLeft={15}
-                name="arrow-right"
-                size={10}
-                color="#60698a"
-              />
-            </View>
-          </TouchableOpacity>
-
-          </> : 
-          <>
-          {/* Dang ki ban hang */}
-          <TouchableOpacity
-            style={styles.list_items}
-            onPress={() => navigation.navigate("Register Seller")}
-          >
-            <View
-              style={{
-                alignItems: "flex-start",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <Entypo
-                name="shop"
-                size={25}
-                marginLeft={10}
-                color={color.origin}
-              />
-              <Text style={{ marginLeft: 10 }}> Bắt đầu bán</Text>
-            </View>
-            <View
-              style={{
-                alignItems: "flex-end",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <Text> Đăng kí miễn phí</Text>
-              <SimpleLineIcons
-                marginLeft={15}
-                name="arrow-right"
-                size={10}
-                color="#60698a"
-              />
-            </View>
-          </TouchableOpacity>
-
-          </>}
+          {user && user.seller ? (
+            <>
+              {/* My shop */}
+              <TouchableOpacity
+                style={styles.list_items}
+                onPress={() => navigation.navigate("MyShop")}
+              >
+                <View
+                  style={{
+                    alignItems: "flex-start",
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <Entypo
+                    name="shop"
+                    size={25}
+                    marginLeft={10}
+                    color={color.origin}
+                  />
+                  <Text style={{ marginLeft: 10 }}> Cửa hàng của tôi </Text>
+                </View>
+                <View
+                  style={{
+                    alignItems: "flex-end",
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text> Xem </Text>
+                  <SimpleLineIcons
+                    marginLeft={15}
+                    name="arrow-right"
+                    size={10}
+                    color="#60698a"
+                  />
+                </View>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              {/* Dang ki ban hang */}
+              <TouchableOpacity
+                style={styles.list_items}
+                onPress={() =>
+                  user
+                    ? navigation.navigate("Register Seller", {
+                        idUser: isLogin.uid,
+                      })
+                    : Alert.alert("Thông báo", "Vui lòng đăng nhập trước", [
+                      {
+                        text: "OK",
+                        onPress: () => {
+                          navigation.navigate('Login');
+                        },
+                      },
+                    ])
+                }
+              >
+                <View
+                  style={{
+                    alignItems: "flex-start",
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <Entypo
+                    name="shop"
+                    size={25}
+                    marginLeft={10}
+                    color={color.origin}
+                  />
+                  <Text style={{ marginLeft: 10 }}> Bắt đầu bán</Text>
+                </View>
+                <View
+                  style={{
+                    alignItems: "flex-end",
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text> Đăng kí miễn phí</Text>
+                  <SimpleLineIcons
+                    marginLeft={15}
+                    name="arrow-right"
+                    size={10}
+                    color="#60698a"
+                  />
+                </View>
+              </TouchableOpacity>
+            </>
+          )}
 
           <Button title="Logout" onPress={handleLogout} disabled={!isLogin} />
         </View>
@@ -350,6 +382,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "white",
     alignItems: "center",
+    paddingVertical: 10,
     marginVertical: 10,
     marginLeft: 10,
   },

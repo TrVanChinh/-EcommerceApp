@@ -5,7 +5,6 @@ import { collection, getDocs, where, query, doc } from "firebase/firestore";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Image } from "react-native-elements";
 import auth from "@react-native-firebase/auth";
-import { FirebaseFirestoreTypes } from "@react-native-firebase/firestore";
 //idUserTuong:SGRmRvN7t2aKv4ylKAmqs0Llbnr1
 
 const ListProducts = ({ navigation }) => {

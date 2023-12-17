@@ -24,6 +24,8 @@ import {
   FontAwesome5,
 } from "@expo/vector-icons";
 import ListProducts from "../screens/Seller/ListProducts";
+import CategoryScreen from "../screens/Seller/Categories/CategoryScreen";
+import SubcategoryScreen from "../screens/Seller/Categories/SubcategoryScreen";
 
 
 const StackNavigator = () => {
@@ -161,34 +163,24 @@ const StackNavigator = () => {
         <Stack.Screen name="AddProduct" component={AddPrucductScreen}
           options={{
             headerTitle: "Thêm sản phẩm",
-            headerRight: () => (
-              <TouchableOpacity
-                onPress={() => alert('This is a button!')}
-              ><Text style={{color:color.origin, fontWeight:'bold'}}>Lưu</Text>
-              </TouchableOpacity>
-            ),
           }} 
         />
         <Stack.Screen name="ListProducts" component={ListProducts}
           options={{
             headerTitle: "Danh sách sản phẩm",
-            headerRight: () => (
-              <TouchableOpacity
-                onPress={() => alert('This is a button!')}
-              ><Text style={{color:color.origin, fontWeight:'bold'}}>Lưu</Text>
-              </TouchableOpacity>
-            ),
           }} 
         />
         <Stack.Screen name="MyShop" component={MyShopScreen}
           options={{
             headerTitle: "Cửa hàng",
-            headerRight: () => (
-              <TouchableOpacity
-                onPress={() => alert('This is a button!')}
-              ><Text style={{color:color.origin, fontWeight:'bold'}}>Lưu</Text>
-              </TouchableOpacity>
-            ),
+          }} 
+        />
+        <Stack.Screen name="SelectCategory" component={CategoryScreen} options={{
+            headerTitle: "Chọn danh mục",
+          }} 
+        />
+        <Stack.Screen name="SelectSubcategory" component={SubcategoryScreen}options={{
+            headerTitle: "Chọn danh mục con",
           }} 
         />
       </Stack.Navigator>
