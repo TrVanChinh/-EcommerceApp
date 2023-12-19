@@ -10,6 +10,11 @@ import HomeScreen from "../screens/HomeScreen";
 import LiveScreen from "../screens/LiveScreen";
 import NotificationScreen from "../screens/NotificationScreen";
 import VideoScreen from "../screens/VideoScreeen";
+import OTPScreen from "../components/OTPScreen";
+import DetailScreen from "../screens/DetailScreen"
+import SearchScreen from "../screens/SearchScreen"
+import CartScreen from "../screens/CartScreen";
+import SmsLoginScreen from "../screens/SmsLoginScreen";
 import {Entypo, AntDesign, Octicons , MaterialCommunityIcons, Ionicons, FontAwesome5  } from '@expo/vector-icons';
 const StackNavigator = () => {
   const Stack = createNativeStackNavigator();
@@ -110,8 +115,14 @@ const StackNavigator = () => {
       <Stack.Navigator>
         <Stack.Screen name="Main" component={BottomTabs} options={{headerShown:false}}/>
         <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="Home" component={HomeScreen} options={{headerShown:false}}/>
         <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="SmsLogin" component={SmsLoginScreen} options={{headerShown:false}}/>
         <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen name="OTPScreen" component={OTPScreen} />
+        <Stack.Screen name="Detail" component={DetailScreen} options={{headerShown:false}}/>
+        <Stack.Screen name="Search" component={SearchScreen} options={{headerShown:false}}/>
+        <Stack.Screen name="Cart" component={CartScreen} options={{headerShown:false}}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

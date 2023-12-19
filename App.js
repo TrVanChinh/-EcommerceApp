@@ -12,23 +12,53 @@
 
 //npm i axios
 
-//npm install --save @react-native-firebase/app
+//npx expo install @react-native-firebase/app
+//npx expo install firebase
 
 //create slide:
 //npm install react-native-swiper
 
-//login google
+//login google:
 //npx expo install expo-dev-client
 //eas build --profile development --platform android
 //npx expo install @react-native-google-signin/google-signin
 //npm i @react-native-firebase/auth
 //npx expo start --dev-client
 
+//login facebook:
+//npm install --save react-native-fbsdk-next
 
+
+// check sha-1:
+//eas credentials 
+
+//image picker
+//npx expo install expo-image-picker
+//npm install expo-module-scripts
+//expo install expo-constants
+
+
+//login sms
+//npx expo install expo-firebase-recaptcha@2.3.1
+//npx expo install expo-firebase-recaptcha
+//npm install react-native-webview@11.23.1
+//npx expo install expo-firebase-core
+
+//delete all node_modules
+//rd /s /q node_modules
+
+//filter
+//npm install @react-navigation/drawer
+//npx expo install react-native-gesture-handler react-native-reanimated
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import ProfileScreen from './screens/ProfileScreen';
 import StackNavigator from './navigation/StackNavigator';
+import ImgPicker from './components/ImgPicker';
+import DetailScreen from './screens/DetailScreen';
+import SearchScreen from './screens/SearchScreen';
+import TestFB from './components/TestFB'
+import SmsLoginScreen from './screens/SmsLoginScreen';
 export default function App() {
   return (
     <StackNavigator/>
@@ -43,3 +73,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
+
+
