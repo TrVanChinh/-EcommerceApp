@@ -1,7 +1,6 @@
-import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { useEffect, useState } from "react";
-import { db } from "../../firebaseConfig";
-import { collection, getDocs, where, query, doc } from "firebase/firestore";
+import { collection, getDocs, where, query, doc, getFirestore } from "firebase/firestore";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Image } from "react-native-elements";
 import auth from "@react-native-firebase/auth";
@@ -11,7 +10,8 @@ const ListProducts = ({ navigation }) => {
   const [user, setUser] = useState(null);
   const [name, setName] = useState("");
   const [products, setProducts] = useState([]);
-
+  const db = getFirestore();
+  
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged((authenticatedUser) => {
       setUser(authenticatedUser);
@@ -65,8 +65,7 @@ const ListProducts = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView>
-      <FlatList
+        <FlatList
         data={products}
         renderItem={({ item }) => (
           <TouchableOpacity key={item.id} style={styles.item_prd}>
@@ -90,7 +89,6 @@ const ListProducts = ({ navigation }) => {
           </TouchableOpacity>
         )}
       />
-    </SafeAreaView>
   );
 };
 

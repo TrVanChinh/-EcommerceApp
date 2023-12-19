@@ -26,26 +26,28 @@ import {
   getDocs,
   where,
   query,
+  getFirestore,
 } from "firebase/firestore";
-import { db } from "../firebaseConfig";
 import { useFocusEffect } from "@react-navigation/native";
+import { app } from "../firebaseConfig";
 
 const ProfileScreen = ({ navigation }) => {
   const [isLogin, setLogin] = useState(null);
   const [user, setUser] = useState(null);
-  // useEffect(() => {
-  //   const unsubscribe = auth().onAuthStateChanged((authenticatedUser) => {
-  //     setLogin(authenticatedUser);
-  //     // console.log(isLogin);
-  //     if (authenticatedUser) {
-  //       // Nếu user không null, tiến hành lấy dữ liệu
-  //       getUser(authenticatedUser);
-  //     }
-  //   });
+  const db = getFirestore(app);
+  useEffect(() => {
+    const unsubscribe = auth().onAuthStateChanged((authenticatedUser) => {
+      setLogin(authenticatedUser);
+      // console.log(isLogin);
+      if (authenticatedUser) {
+        // Nếu user không null, tiến hành lấy dữ liệu
+        getUser(authenticatedUser);
+      }
+    });
 
-  //   // Hủy người nghe khi component unmount
-  //   return () => unsubscribe();
-  // }, []);
+    // Hủy người nghe khi component unmount
+    return () => unsubscribe();
+  }, []);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -72,7 +74,7 @@ const ProfileScreen = ({ navigation }) => {
   const handleLogout = () => {
     auth()
       .signOut()
-      .then(() => console.log("User signed out!"))
+      .then(() => console.log("Đã đăng xuất!"))
       .catch((error) => alert("Vui lòng đăng nhập trước"));
     setLogin(null);
     setUser(null);
@@ -298,13 +300,13 @@ const ProfileScreen = ({ navigation }) => {
                         idUser: isLogin.uid,
                       })
                     : Alert.alert("Thông báo", "Vui lòng đăng nhập trước", [
-                      {
-                        text: "OK",
-                        onPress: () => {
-                          navigation.navigate('Login');
+                        {
+                          text: "OK",
+                          onPress: () => {
+                            navigation.navigate("Login");
+                          },
                         },
-                      },
-                    ])
+                      ])
                 }
               >
                 <View
@@ -340,6 +342,54 @@ const ProfileScreen = ({ navigation }) => {
               </TouchableOpacity>
             </>
           )}
+          <TouchableOpacity
+            style={styles.list_items}
+            onPress={() =>
+              user
+                ? navigation.navigate("EditUserInfo", {
+                    idUser: isLogin.uid,
+                  })
+                : Alert.alert("Thông báo", "Vui lòng đăng nhập trước", [
+                    {
+                      text: "OK",
+                      onPress: () => {
+                        navigation.navigate("Login");
+                      },
+                    },
+                  ])
+            }
+          >
+            <View
+              style={{
+                alignItems: "flex-start",
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <Feather
+                name="user"
+                size={25}
+                marginLeft={10}
+                color={color.origin}
+              />
+              <Text style={{ marginLeft: 10 }}>Chỉnh sửa thông tin</Text>
+            </View>
+            <View
+              style={{
+                alignItems: "flex-end",
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <Text></Text>
+              <SimpleLineIcons
+                marginLeft={15}
+                name="arrow-right"
+                size={10}
+                color="#60698a"
+              />
+            </View>
+          </TouchableOpacity>
 
           <Button title="Logout" onPress={handleLogout} disabled={!isLogin} />
         </View>

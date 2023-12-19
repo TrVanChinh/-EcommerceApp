@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TextInput, Alert } from "react-native";
+import { StyleSheet, Text, View, TextInput, Alert ,ActivityIndicator} from "react-native";
 import React, { useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { SimpleLineIcons, Entypo } from "@expo/vector-icons";
@@ -20,6 +20,7 @@ const RegisterSellerScreen = ({ navigation, route }) => {
   const [phone, onChangePhone] = useState("");
   const { idUser: idUser } = route.params || {};
   const db = getFirestore();
+  const [loading, setLoading] = useState(false);
 
   const setToSeller = async () => {
     try {
@@ -29,14 +30,14 @@ const RegisterSellerScreen = ({ navigation, route }) => {
         alert("Chưa nhập địa chỉ");
       } else {
         const docRef = doc(db, "user", idUser);
-
+        setLoading(true);
         await updateDoc(docRef, {
           seller: true,
           address: address,
           shopName: shopName,
         });
         const updatedDocSnap = await getDoc(docRef);
-
+        setLoading(false);
         if (updatedDocSnap.exists()) {
           const isSeller = updatedDocSnap.data().seller;
 
@@ -54,18 +55,21 @@ const RegisterSellerScreen = ({ navigation, route }) => {
             console.error(
               "Cập nhật không thành công. Trường 'seller' không phải là true."
             );
+            setLoading(false);
           }
         } else {
           console.error("Dữ liệu không tồn tại sau khi cập nhật.");
+          setLoading(false);
         }
       }
     } catch (error) {
       console.error("Lỗi khi cập nhật:", error);
+      setLoading(false);
     }
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1 }}>      
       <View style={{ flex: 8 }}>
         <View style={styles.list_items}>
           <View style={{ flexDirection: "row" }}>
@@ -120,6 +124,11 @@ const RegisterSellerScreen = ({ navigation, route }) => {
       <View style={{}}>
         <Button title="Đăng kí" color={color.origin} onPress={setToSeller} />
       </View>
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      )}
     </View>
   );
 };
@@ -136,5 +145,11 @@ const styles = StyleSheet.create({
   },
   input: {
     marginLeft: 12,
+  },
+  loadingContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

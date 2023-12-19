@@ -10,13 +10,13 @@ import {
 import React, { useEffect, useState } from "react";
 import { SimpleLineIcons, Ionicons } from "@expo/vector-icons";
 
-import { doc, setDoc, addDoc, collection, getDocs } from "firebase/firestore";
-import { db } from "../../../firebaseConfig";
+import { doc, setDoc, addDoc, collection, getDocs, getFirestore } from "firebase/firestore";
 
 const CategoryScreen = ({ route, navigation }) => {
   const { categories: categories } = route.params;
   const [subcategories, setSubcategory]=useState([])
 
+  const db = getFirestore();
   useEffect(() => {
     // console.log(subcategories);
     if (subcategories.length > 0) {

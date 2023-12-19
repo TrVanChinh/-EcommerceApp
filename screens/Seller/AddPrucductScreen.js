@@ -9,6 +9,7 @@ import {
   Alert,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
   BackHandler,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
@@ -22,8 +23,14 @@ import {
   Octicons,
 } from "@expo/vector-icons";
 import auth from "@react-native-firebase/auth";
-import { doc, setDoc, addDoc, collection, getDocs } from "firebase/firestore";
-import { db } from "../../firebaseConfig";
+import {
+  doc,
+  setDoc,
+  addDoc,
+  collection,
+  getDocs,
+  getFirestore,
+} from "firebase/firestore";
 import {
   getDownloadURL,
   getStorage,
@@ -33,6 +40,7 @@ import {
 } from "firebase/storage";
 
 const AddProductScreen = ({ navigation, route }) => {
+  const db = getFirestore();
   const [name, onchangeProductName] = useState("");
   const [descript, onchangeProductDes] = useState("");
   const [images, setImages] = useState([]);
@@ -44,6 +52,7 @@ const AddProductScreen = ({ navigation, route }) => {
   const storage = getStorage();
   const [categories, setCategory] = useState([]);
   const { idSubcategory, nameSubcategory } = route.params || {};
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged((authenticatedUser) => {
@@ -108,6 +117,7 @@ const AddProductScreen = ({ navigation, route }) => {
       });
     });
 
+    setLoading(false);
     Alert.alert("Thông báo", "Sản phẩm đã được thêm thành công", [
       {
         text: "OK",
@@ -119,92 +129,96 @@ const AddProductScreen = ({ navigation, route }) => {
   };
 
   const pickImages = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsMultipleSelection: true,
-      aspect: [4, 3],
-      base64: true,
-      quality: 1,
-    });
+    if (images.length < 10) {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsMultipleSelection: true,
+        aspect: [4, 3],
+        base64: true,
+        quality: 1,
+      });
 
-    if (!result.canceled) {
-      const newImages = result.assets.map((asset) => asset.uri);
-      const totalImages = [...images, ...newImages];
+      if (!result.canceled) {
+        const newImages = result.assets.map((asset) => asset.uri);
+        const totalImages = [...images, ...newImages];
 
-      if (totalImages.length > 10) {
-        Alert.alert("Thông báo", "Chỉ được chọn tối đa 10 ảnh");
-      } else {
-        setImages(totalImages);
+        if (totalImages.length > 10) {
+          Alert.alert("Thông báo", "Chỉ được chọn tối đa 10 ảnh");
+        } else {
+          setImages(totalImages);
+        }
       }
-    }
-  };
-
-  const createProduct = async() => {
-    const inputValues = [name, price, descript, quantity, idSubcategory];
-    const inputsFilled = areInputsFilled(inputValues);
-
-    if (images.length === 0) {
-      Alert.alert("Thông báo", "Chưa thêm ảnh");
-    } else if (inputsFilled) {
-      uploadImage();
     } else {
-      Alert.alert("Thông báo", "Chưa nhập đủ thông tin");
+      Alert.alert("Thông báo", "Đã đủ 10 ảnh");
     }
   };
 
   const uploadImage = async () => {
-    const storageRef = ref(storage, "productImg");
+    const inputValues = [name, price, descript, quantity];
+    if (areInputsFilled(inputValues)) {
+      if (images.length > 0) {
+        const storageRef = ref(storage, "productImg");
+        const getCurrentTimestamp = () => {
+          const date = new Date();
+          return `${date.getFullYear()}${(date.getMonth() + 1)
+            .toString()
+            .padStart(2, "0")}${date
+            .getDate()
+            .toString()
+            .padStart(2, "0")}_${date
+            .getHours()
+            .toString()
+            .padStart(2, "0")}${date
+            .getMinutes()
+            .toString()
+            .padStart(2, "0")}${date.getSeconds().toString().padStart(2, "0")}`;
+        };
+        setLoading(true);
+        const uploadTasks = images.map(async (uri, index) => {
+          const response = await fetch(uri);
+          const blob = await response.blob();
 
-    const getCurrentTimestamp = () => {
-      const date = new Date();
-      return `${date.getFullYear()}${(date.getMonth() + 1)
-        .toString()
-        .padStart(2, "0")}${date.getDate().toString().padStart(2, "0")}_${date
-        .getHours()
-        .toString()
-        .padStart(2, "0")}${date.getMinutes().toString().padStart(2, "0")}${date
-        .getSeconds()
-        .toString()
-        .padStart(2, "0")}`;
-    };
+          // Construct a unique filename based on the index (you might want to use a more meaningful name)
+          const filename =
+            userId + `_${index + 1}_${getCurrentTimestamp()}.jpg`;
 
-    const uploadTasks = images.map(async (uri, index) => {
-      const response = await fetch(uri);
-      const blob = await response.blob();
+          // Create a reference to the new file in Firebase Storage
+          const imageRef = ref(storageRef, filename);
 
-      // Construct a unique filename based on the index (you might want to use a more meaningful name)
-      const filename = userId + `_${index + 1}_${getCurrentTimestamp()}.jpg`;
+          const snapshot = await uploadBytesResumable(imageRef, blob);
+          return snapshot.ref;
+        });
 
-      // Create a reference to the new file in Firebase Storage
-      const imageRef = ref(storageRef, filename);
+        try {
+          // Wait for all upload tasks to complete
+          const uploadSnapshots = await Promise.all(uploadTasks);
 
-      const snapshot = await uploadBytesResumable(imageRef, blob);
-      return snapshot.ref;
-    });
+          // Get download URLs for each uploaded image
+          const downloadURLs = await Promise.all(
+            uploadSnapshots.map((snapshot) => getDownloadURL(snapshot))
+          );
+          // Log the download URLs
+          const list = [];
+          downloadURLs.forEach((url, index) => {
+            setUrlImage((prevUrlImage) => [...prevUrlImage, url]);
 
-    try {
-      // Wait for all upload tasks to complete
-      const uploadSnapshots = await Promise.all(uploadTasks);
+            // console.log(`Download URL ${index + 1}: ${url}`);
+          });
+          // console.log(`Download URL: `,urlImage);
+          console.log("Tất cả ảnh đã được upload.");
 
-      // Get download URLs for each uploaded image
-      const downloadURLs = await Promise.all(
-        uploadSnapshots.map((snapshot) => getDownloadURL(snapshot))
-      );
-      // Log the download URLs
-      const list = [];
-      downloadURLs.forEach((url, index) => {
-        setUrlImage((prevUrlImage) => [...prevUrlImage, url]);
-        
-        // console.log(`Download URL ${index + 1}: ${url}`);
-      });
-      // console.log(`Download URL: `,urlImage);
-      console.log("Tất cả ảnh đã được upload.");
-
-      addProduct(downloadURLs);
-      setSelectedImages([]);
-      setImages([]);
-    } catch (error) {
-      console.error("Error uploading images:", error.message);
+          addProduct(downloadURLs);
+          setSelectedImages([]);
+          setImages([]);
+        } catch (error) {
+          setLoading(false);
+          console.error("Error uploading images:", error.message);
+        }
+      } else {
+        Alert.alert("Cảnh báo", "Chưa thêm ảnh sản phẩm");
+      }
+    } else {
+      Alert.alert("Cảnh báo", "Nhập thiếu thông tin sản phẩm");
     }
   };
   const handleImagePress = (index) => {
@@ -309,6 +323,7 @@ const AddProductScreen = ({ navigation, route }) => {
         </View>
         <Text style={{ paddingVertical: 5 }}>Thêm tối đa 10 ảnh</Text>
       </View>
+      {/* Tên sản phẩm */}
       <View style={styles.name_item}>
         <View style={{ flexDirection: "row" }}>
           <Text style={{ marginLeft: 10, fontSize: 16 }}>Tên sản phẩm</Text>
@@ -321,6 +336,7 @@ const AddProductScreen = ({ navigation, route }) => {
           value={name}
         />
       </View>
+      {/* Mô tả */}
       <View style={styles.name_item}>
         <View style={{ flexDirection: "row" }}>
           <Text style={{ marginLeft: 10, fontSize: 16 }}>Mô tả</Text>
@@ -414,6 +430,7 @@ const AddProductScreen = ({ navigation, route }) => {
           onChangeText={handleQuantityChange}
         />
       </View>
+      {/* Button Thêm */}
       <TouchableOpacity
         style={{ backgroundColor: color.origin, marginHorizontal: 100 }}
         onPress={uploadImage}
@@ -421,19 +438,14 @@ const AddProductScreen = ({ navigation, route }) => {
         <View
           style={{ alignItems: "center", justifyContent: "center", height: 35 }}
         >
-          <Text style={{ color: "white" }}>Up img</Text>
-        </View>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={{ backgroundColor: color.origin, marginHorizontal: 100 }}
-        onPress={addProduct}
-      >
-        <View
-          style={{ alignItems: "center", justifyContent: "center", height: 35 }}
-        >
           <Text style={{ color: "white" }}>Thêm sản phẩm</Text>
         </View>
       </TouchableOpacity>
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      )}
     </ScrollView>
   );
 };
@@ -458,5 +470,11 @@ const styles = StyleSheet.create({
   input: {
     marginLeft: 20,
     marginTop: 5,
+  },
+  loadingContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

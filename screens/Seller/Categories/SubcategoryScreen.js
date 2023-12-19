@@ -7,10 +7,13 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { getFirestore } from "firebase/firestore";
 
 const SubcategoryScreen = ({ navigation, route }) => {
   const { subcategories: subcategories } = route.params;
   const [subcategory, setSubcategory] = useState([]);
+  
+  const db = getFirestore();
 
   // useEffect(() => {
   //   if (subcategory.length > 0) {

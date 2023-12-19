@@ -26,6 +26,7 @@ import {
 import ListProducts from "../screens/Seller/ListProducts";
 import CategoryScreen from "../screens/Seller/Categories/CategoryScreen";
 import SubcategoryScreen from "../screens/Seller/Categories/SubcategoryScreen";
+import EditUserInfoScreen from "../screens/EditUserInfoScreen";
 
 
 const StackNavigator = () => {
@@ -104,17 +105,56 @@ const StackNavigator = () => {
             headerShown: false,
             tabBarIcon: ({ focused }) =>
               focused ? (
+                <>
                 <Ionicons
                   name="md-notifications-sharp"
                   size={24}
                   color="#F1582C"
                 />
+                <View
+                style={{
+                  position: "absolute",
+                  top: 1,
+                  right: 10,
+                  backgroundColor: color.origin,
+                  borderRadius: 10,
+                  borderColor: "white",
+                  borderWidth: 1,
+                  width: 30,
+                  height: 20,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ color: "white", fontSize: 12 }}>99+</Text>
+              </View>
+                </>
               ) : (
+                <>
                 <Ionicons
                   name="md-notifications-outline"
                   size={24}
                   color="black"
                 />
+                <View
+                style={{
+                  position: "absolute",
+                  top: 1,
+                  right: 10,
+                  backgroundColor: color.origin,
+                  borderRadius: 10,
+                  borderColor: "white",
+                  borderWidth: 1,
+                  width: 30,
+                  height: 20,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ color: "white", fontSize: 12 }}>99+</Text>
+              </View>
+                </>
+                
               ),
           }}
         />
@@ -151,13 +191,8 @@ const StackNavigator = () => {
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="Register Seller" component={RegisterSellerScreen}
           options={{
-            headerTitle: "Đăng kí bán hàng",
-            headerRight: () => (
-              <TouchableOpacity
-                onPress={() => alert('This is a button!')}
-              ><Text style={{color:color.origin, fontWeight:'bold'}}>Lưu</Text>
-              </TouchableOpacity>
-            ),
+            headerTitle: "Đăng kí bán hàng",           
+            headerTitleAlign: "center", 
           }} 
         />
         <Stack.Screen name="AddProduct" component={AddPrucductScreen}
@@ -172,7 +207,7 @@ const StackNavigator = () => {
         />
         <Stack.Screen name="MyShop" component={MyShopScreen}
           options={{
-            headerTitle: "Cửa hàng",
+            headerTitle: "Cửa hàng của tôi",
           }} 
         />
         <Stack.Screen name="SelectCategory" component={CategoryScreen} options={{
@@ -181,6 +216,11 @@ const StackNavigator = () => {
         />
         <Stack.Screen name="SelectSubcategory" component={SubcategoryScreen}options={{
             headerTitle: "Chọn danh mục con",
+          }} 
+        />
+        <Stack.Screen name="EditUserInfo" component={EditUserInfoScreen}options={{
+            headerTitle: "Thông tin tài khoản",          
+            headerTitleAlign: "center", 
           }} 
         />
       </Stack.Navigator>
