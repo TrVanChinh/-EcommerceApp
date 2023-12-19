@@ -10,25 +10,21 @@ import HomeScreen from "../screens/HomeScreen";
 import LiveScreen from "../screens/LiveScreen";
 import NotificationScreen from "../screens/NotificationScreen";
 import VideoScreen from "../screens/VideoScreeen";
+import OTPScreen from "../components/OTPScreen";
+import DetailScreen from "../screens/DetailScreen";
+import SearchScreen from "../screens/SearchScreen";
+import CartScreen from "../screens/CartScreen";
+import SmsLoginScreen from "../screens/SmsLoginScreen";
 import RegisterSellerScreen from "../screens/Seller/RegisterSellerScreen";
 import AddPrucductScreen from "../screens/Seller/AddPrucductScreen";
 import MyShopScreen from "../screens/Seller/MyShopScreen";
 import color from "../components/color";
-
-import {
-  Entypo,
-  AntDesign,
-  Octicons,
-  MaterialCommunityIcons,
-  Ionicons,
-  FontAwesome5,
-} from "@expo/vector-icons";
 import ListProducts from "../screens/Seller/ListProducts";
 import CategoryScreen from "../screens/Seller/Categories/CategoryScreen";
 import SubcategoryScreen from "../screens/Seller/Categories/SubcategoryScreen";
 import EditUserInfoScreen from "../screens/EditUserInfoScreen";
 
-
+import {Entypo, AntDesign, Octicons , MaterialCommunityIcons, Ionicons, FontAwesome5  } from '@expo/vector-icons';
 const StackNavigator = () => {
   const Stack = createNativeStackNavigator();
   const Tab = createBottomTabNavigator();
@@ -187,8 +183,14 @@ const StackNavigator = () => {
           options={{ headerShown: false }}
         />
         <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="Home" component={HomeScreen} options={{headerShown:false}}/>
         <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="SmsLogin" component={SmsLoginScreen} options={{headerShown:false}}/>
         <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen name="OTPScreen" component={OTPScreen} />
+        <Stack.Screen name="Detail" component={DetailScreen} options={{headerShown:false}}/>
+        <Stack.Screen name="Search" component={SearchScreen} options={{headerShown:false}}/>
+        <Stack.Screen name="Cart" component={CartScreen} options={{headerShown:false}}/>
         <Stack.Screen name="Register Seller" component={RegisterSellerScreen}
           options={{
             headerTitle: "Đăng kí bán hàng",           

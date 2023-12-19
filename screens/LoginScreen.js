@@ -30,12 +30,13 @@ const LoginScreen = ({navigation}) => {
     console.log('Login success:', user);
     navigation.navigate('Main')
   }
+  const onVerifyscreent = {}
   return (
     <SafeAreaView style={{ width: "100%", alignItems: "center" }}>
-      <View>
+      <View> 
         <Image
-          style={{ width: 60, height: 60, top: 20 }}
-          source={require("../assets/LogoShopee.png")}
+          style={{ width: 60, height: 80, top: 20 }}
+          source={require("../assets/shopLogo.png")}
         />
       </View>
       <View style={{ width: "90%", top: 30 }}>
@@ -66,7 +67,7 @@ const LoginScreen = ({navigation}) => {
                 <Feather 
                   name="eye-off" 
                   size={24} 
-                  color="black" 
+                  color="#857E7C" 
                   onPress={togglePasswordVisibility}
                 />
             }
@@ -87,7 +88,7 @@ const LoginScreen = ({navigation}) => {
             Đăng nhập
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={{ marginTop: 20, alignItems:'flex-end'}}>
+        <TouchableOpacity style={{ marginTop: 20, alignItems:'flex-end'}} onPress={() => navigation.navigate('SmsLogin')}>
           <Text style={{ color:"blue"}}>Đăng nhập bằng SMS</Text>
         </TouchableOpacity>
         <View style={{ flexDirection: "row", alignItems: 'center', marginVertical: 20 }}>
@@ -100,17 +101,25 @@ const LoginScreen = ({navigation}) => {
           style={{
             borderWidth: 1,
             borderColor:'#D5DBCD',
+            backgroundColor:'#357EFF',
             padding: 12,
             alignItems: "center",
             marginBottom: 10,
-            
           }}
           onPress={() => {
             console.log("Facebook");
           }}
-        >
-          <Text>Sign in with Facebook</Text>
+        > 
+          
+          <Text style={{color:'white'}}>Facebook</Text>
         </TouchableOpacity>
+        <View style={{flexDirection:'row', justifyContent:'center', alignItems:"center", paddingTop:20}}>
+          <Text>Bạn chưa có tài khoản?</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+            <Text style={{ color:'blue'}}>Đăng ký</Text>
+          </TouchableOpacity>
+        </View>
+          
       </View>
     </SafeAreaView>
   );

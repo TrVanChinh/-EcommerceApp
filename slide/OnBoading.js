@@ -19,7 +19,7 @@ const SlideShow = () => {
   return (
     <Swiper
       ref={swiperRef}
-      style={styles.wrapper}
+      style={styles.wrapper} 
       showsButtons={false}
       autoplay
       autoplayInterval={3000} 

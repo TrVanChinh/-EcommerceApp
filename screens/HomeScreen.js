@@ -1,12 +1,15 @@
 import { StyleSheet, Text, View,SafeAreaView, Platform, ScrollView, TouchableOpacity, Image, TextInput, FlatList, Pressable } from 'react-native'
 import React from 'react'
-import { Input, Icon } from "react-native-elements";
-import { useState } from "react";
+import { useState, useEffect, useLayoutEffect } from "react";
 import { Feather, SimpleLineIcons , AntDesign } from "@expo/vector-icons";
 import SlideShow from '../slide/OnBoading';
-const HomeScreen = () => {
-    const [search, setSearch] = useState('')
+import { collection, doc, query, onSnapshot, getDocs  } from 'firebase/firestore';
+import {db} from '../firebase'
+import auth from "@react-native-firebase/auth";
 
+const HomeScreen = ({ navigation }) => {
+    const [products, setProducts] = useState([])
+    const [search, setSearch] = useState('')
     const [services, setServices] = useState([
         {
             name: 'Khung Giờ Săn Sale',
@@ -143,6 +146,50 @@ const HomeScreen = () => {
         },
         
     ])
+    
+
+    useLayoutEffect(() => {
+        const fetchData = async () => {
+          const snapshot = await getDocs(collection(db, 'product'));
+          const productsData = [];
+      
+          for (const productDoc of snapshot.docs) {
+            const productId = productDoc.id;
+            const productData = productDoc.data();
+      
+            const imageSnapshot = await getDocs(collection(doc(db, 'product', productId), 'image'));
+      
+            if (imageSnapshot.docs.length > 0) {
+              const imageUrl = imageSnapshot.docs[0].data().url;
+              productsData.push({
+                id: productId,
+                data: { ...productData, imageUrl }, 
+              });
+            }
+          }
+          setProducts(productsData);
+        };
+      
+        const unsubscribe = onSnapshot(collection(db, 'product'), () => {
+          fetchData();
+        });
+      
+        return () => unsubscribe();
+      }, []); 
+      
+// Điều hướng sang màn hình chi tiết và gửi ID của sản phẩm
+    const handleItemPress = (product) => {
+        navigation.navigate('Detail', { product });
+      };
+
+// Điều hướng sang màn hình tìm kiếm
+    // const handleSearch = (search) => {
+    //     navigation.navigate('Search', { search });
+    //   };
+
+    const handleSearch = () => {
+        navigation.navigate('Search');
+      };
   return (
     <SafeAreaView 
         style={{
@@ -154,15 +201,6 @@ const HomeScreen = () => {
         <ScrollView >
             <SlideShow/>
             <View style={{ position:"absolute", flexDirection:"row", alignItems:"center", justifyContent:"center"}}>  
-                {/* <View style={{ width:"80%", padding:10}}>
-                    <Input
-                        placeholder="Search"
-                        onChangeText={(text) => setSearch(text)}
-                        value={search}
-                        leftIcon={<Feather name="search" size={24} color="black" />}
-                        rightIcon={<AntDesign name="camerao" size={24} color="black" />}
-                    />
-                </View> */}
                 <View style = {{
                         height: 40,
                         width:"70%",
@@ -172,7 +210,18 @@ const HomeScreen = () => {
                         backgroundColor:"white",
                         padding: 10,
                     }}>
-                    <Feather name="search" size={24} color="#857E7C" />
+                    <TouchableOpacity
+                        onPress={() => {
+                            // if(search==''){
+                            //     alert("Xin mời bạn nhập sản phẩm")
+                            // }else{
+                            //     handleSearch()
+                            // }
+                            handleSearch() 
+                        }}
+                    >
+                        <Feather name="search" size={24} color="#857E7C" />
+                    </TouchableOpacity>
                     <TextInput 
                             placeholder='Tìm kiếm'
                             onChangeText={(text) => {
@@ -237,56 +286,6 @@ const HomeScreen = () => {
                     horizontal  
                     style={{ flex: 1}}
                     keyExtractor={item => item.url}
-                    data={productFlashSale}
-                    renderItem={({item}) => {
-                        return <TouchableOpacity
-                                    onPress={() => {
-                                        alert(`press ${item.price}`)
-                                    }}
-                                    style = {{ 
-                                        justifyContent:'center',
-                                        alignItems:'center'
-                                    }}
-                                >
-                                <View>
-                                    <Image
-                                        style={{
-                                            width: 200,
-                                            height: 200,
-                                            resizeMode: 'cover',
-                                            borderRadius: 25,
-                                            margin: 10,
-                                        }}
-                                        source={{
-                                            uri: item.url
-                                        }}
-                                        />
-                                    <View style={{
-                                            width: 50,
-                                            position:"absolute",
-                                            marginTop: 20,
-                                            alignItems: 'flex-end',
-                                            backgroundColor: 'red'
-                                        }}>
-                                        <Text style={{color:'yellow'}}>{item.sale}</Text>
-                                    </View>
-                                </View>    
-                                <View style={{ width: 100, paddingBottom:10}}>
-                                    <Text style={{ textAlign: "center",fontSize: 20, color:'red'}}>{item.price}</Text>
-                                </View>
-                        </TouchableOpacity>
-                    }}
-                >
-                </FlatList>
-            </View>
-            <View>
-                <Text style={{ color:'red', fontWeight:"bold", padding:20}}>GỢI Ý HÔM NAY</Text>
-            </View>
-            <View style = {{height: 250}}>          
-                <FlatList 
-                    horizontal  
-                    style={{ flex: 1}}
-                    keyExtractor={item => item.url}
                     data={product}
                     renderItem={({item}) => {
                         return <TouchableOpacity
@@ -315,7 +314,7 @@ const HomeScreen = () => {
                                             width: 50,
                                             position:"absolute",
                                             marginTop: 20,
-                                            alignItems: 'flex-end',
+                                            alignItems: 'flex-end', 
                                             backgroundColor: 'red'
                                         }}>
                                         <Text style={{color:'yellow'}}>{item.sale}</Text>
@@ -329,8 +328,57 @@ const HomeScreen = () => {
                 >
                 </FlatList>
             </View>
+            <View>
+                <Text style={{ color:'red', fontWeight:"bold", padding:20}}>GỢI Ý HÔM NAY</Text>
+            </View>
+            <View style = {{height: 250}}>          
+                <FlatList 
+                    horizontal  
+                    style={{ flex: 1}}
+                    keyExtractor={item => item.id}
+                    data={products}
+                    renderItem={({item}) => {
+                        return <TouchableOpacity
+                                    onPress={() => 
+                                        handleItemPress(item)
+                                    }
+                                    style = {{ 
+                                        justifyContent:'center',
+                                        alignItems:'center'
+                                    }}
+                                >
+                                <View>
+                                    <Image
+                                        style={{
+                                            width: 200,
+                                            height: 200,
+                                            resizeMode: 'cover',
+                                            borderRadius: 25,
+                                            margin: 10,
+                                        }}
+                                        source={{
+                                            uri: item.data.imageUrl
+                                        }} 
+                                        />
+                                    <View style={{
+                                            width: 50,
+                                            position:"absolute",
+                                            marginTop: 20,
+                                            alignItems: 'flex-end',
+                                            backgroundColor: 'red'
+                                        }}>
+                                        <Text style={{color:'yellow'}}>{item.data.discount}%</Text>
+                                    </View>
+                                </View>    
+                                <View style={{ width: 100, paddingBottom:10}}>
+                                    <Text style={{ textAlign: "center",fontSize: 20, color:'red'}}>{item.data.price}</Text>
+                                </View>
+                        </TouchableOpacity>
+                    }}
+                >
+                </FlatList>
+            </View>
         </ScrollView>
-        
     </SafeAreaView>
   )
 }
