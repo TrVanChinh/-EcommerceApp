@@ -1,0 +1,56 @@
+{
+  "expo": {
+    "name": "EcommerceApp",
+    "slug": "EcommerceApp",
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends."
+        }
+      ],
+      ["@react-native-google-signin/google-signin"],
+      [
+        "react-native-fbsdk-next",
+        {
+          "appID": "1588058182006527",
+          "clientToken": "763b724458f949d54c2410a1be4a6609",
+          "displayName": "EcommerceApp"
+        }
+      ],
+      ["@react-native-firebase/app", "@react-native-firebase/auth"]
+    ],
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "permissions": ["CAMERA_ROLL"],
+      "googleServicesFile": "./google-services.json",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.chinhtran1005.EcommerceApp"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "4238eaf3-92a6-4dc2-897d-1b0d11bc50ed"
+      }
+    }
+  }
+}
