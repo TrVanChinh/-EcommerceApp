@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Button,
-  Switch,
   Image,
   View,
   TextInput,
@@ -12,7 +11,6 @@ import {
   Modal,
   TouchableOpacity,
   ActivityIndicator,
-  BackHandler,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import color from "../../components/color";

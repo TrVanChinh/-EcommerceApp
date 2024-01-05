@@ -1,6 +1,21 @@
-import { Alert, FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  FlatList,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import React, { useEffect, useState } from "react";
-import { collection, getDocs, where, query, doc, getFirestore } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  where,
+  query,
+  doc,
+  getFirestore,
+} from "firebase/firestore";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Image } from "react-native-elements";
 import auth from "@react-native-firebase/auth";
@@ -11,7 +26,7 @@ const ListProducts = ({ navigation }) => {
   const [name, setName] = useState("");
   const [products, setProducts] = useState([]);
   const db = getFirestore();
-  
+
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged((authenticatedUser) => {
       setUser(authenticatedUser);
@@ -63,32 +78,40 @@ const ListProducts = ({ navigation }) => {
     await Promise.all(promises);
     setProducts(listproducts);
   };
-
+  const showPrdID = (a) => {
+    console.log("prdID:", a);
+  };
   return (
-        <FlatList
-        data={products}
-        renderItem={({ item }) => (
-          <TouchableOpacity key={item.id} style={styles.item_prd}>
-            <Image
-              source={{
-                uri: item.imageProduct,
+    <FlatList
+      data={products}
+      renderItem={({ item }) => (
+        <TouchableOpacity
+          key={item.id}
+          style={styles.item_prd}
+          onPress={() =>
+            navigation.navigate("EditProduct", { idProduct: item.idProduct })
+          }
+        >
+          <Image
+            source={{
+              uri: item.imageProduct,
+            }}
+            style={[styles.prd_image, { flex: 1 }]}
+          />
+          <View style={{ flex: 9, justifyContent: "space-between" }}>
+            <Text style={[styles.name_prd]}>{item.nameProduct}</Text>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "flex-end",
               }}
-              style={[styles.prd_image, { flex: 1 }]}
-            />
-            <View style={{ flex: 9, justifyContent: "space-between" }}>
-              <Text style={[styles.name_prd]}>{item.nameProduct}</Text>
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "flex-end",
-                }}
-              >
-                <Text style={styles.prd_price}>{item.priceProduct} vnđ</Text>
-              </View>
+            >
+              <Text style={styles.prd_price}>{item.priceProduct} vnđ</Text>
             </View>
-          </TouchableOpacity>
-        )}
-      />
+          </View>
+        </TouchableOpacity>
+      )}
+    />
   );
 };
 

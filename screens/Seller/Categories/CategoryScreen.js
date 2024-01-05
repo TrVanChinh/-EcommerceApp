@@ -15,12 +15,18 @@ import { doc, setDoc, addDoc, collection, getDocs, getFirestore } from "firebase
 const CategoryScreen = ({ route, navigation }) => {
   const { categories: categories } = route.params;
   const [subcategories, setSubcategory]=useState([])
-
+  const {isUpdate:isUpdate} = route.params;
   const db = getFirestore();
   useEffect(() => {
     // console.log(subcategories);
+    
     if (subcategories.length > 0) {
-      navigation.navigate("SelectSubcategory", { subcategories: subcategories });
+      if(isUpdate){
+        navigation.navigate("SelectSubcategory", { subcategories: subcategories, isUpdate:true });
+      }else{
+        navigation.navigate("SelectSubcategory", { subcategories: subcategories });
+      }
+      
     }
   }, [subcategories, navigation]);
 

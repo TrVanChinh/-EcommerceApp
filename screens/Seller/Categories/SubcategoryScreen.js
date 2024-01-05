@@ -12,7 +12,7 @@ import { getFirestore } from "firebase/firestore";
 const SubcategoryScreen = ({ navigation, route }) => {
   const { subcategories: subcategories } = route.params;
   const [subcategory, setSubcategory] = useState([]);
-  
+  const {isUpdate:isUpdate} = route.params;
   const db = getFirestore();
 
   // useEffect(() => {
@@ -42,8 +42,12 @@ const SubcategoryScreen = ({ navigation, route }) => {
         renderItem={({ item }) => (
           <TouchableOpacity
             onPress={
-              () =>
+              () => !isUpdate?
                 navigation.navigate("AddProduct", {
+                  idSubcategory: item.idSubcate,
+                  nameSubcategory: item.nameSubcate,
+                }):
+                navigation.navigate("EditProduct", {
                   idSubcategory: item.idSubcate,
                   nameSubcategory: item.nameSubcate,
                 })
