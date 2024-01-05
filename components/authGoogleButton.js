@@ -84,7 +84,7 @@ const authGoogleButton = ({ onLoginSuccess }) => {
         email: currentUser.email,
         photo: currentUser.photoURL || null,
       });
-      } 
+      }  
       onLoginSuccess(userCredential);
 
     } catch (error) {

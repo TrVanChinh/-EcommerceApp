@@ -16,6 +16,7 @@ import firebase from "firebase/compat/app";
 import { useUser } from '../UserContext';
 
 const OTPScreen = ({ navigation, route }) => {
+  
   const [code, setCode] = useState("");
   const { updateUser } = useUser();
   const  verificationId  = route.params;
@@ -26,7 +27,7 @@ const OTPScreen = ({ navigation, route }) => {
 
       const credential = firebase.auth.PhoneAuthProvider.credential(
         verificationId.verId,
-        code
+        code 
       );
       const userCredential = await firebase.auth().signInWithCredential(credential);
       updateUser(userCredential)
@@ -38,6 +39,7 @@ const OTPScreen = ({ navigation, route }) => {
         await userRef.set({
           name: "User",
           mobileNo: verificationId.phoneNumber, 
+          photo: "https://icon2.cleanpng.com/20180514/xvw/kisspng-exotel-cloud-communications-privacy-policy-interac-5afa0479ea45a9.7590282815263345859596.jpg"
         });
       }
   

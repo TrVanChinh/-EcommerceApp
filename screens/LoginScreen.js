@@ -32,7 +32,6 @@ const LoginScreen = ({navigation}) => {
     console.log('Login success:', user);
     navigation.navigate('Main')
   }
-  const onVerifyscreent = {}
   return (
     <SafeAreaView style={{ width: "100%", alignItems: "center" }}>
       <View> 

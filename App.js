@@ -53,6 +53,9 @@
 
 //modal
 //npm i react-native-modals
+
+//npm install react-native-element-dropdown --save
+
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import ProfileScreen from './screens/ProfileScreen';
@@ -65,11 +68,15 @@ import SmsLoginScreen from './screens/SmsLoginScreen';
 import CartScreen from './screens/CartScreen';
 import { UserProvider } from './UserContext';
 import { ModalPortal } from 'react-native-modals';
+import OrderScreen from './screens/OrderScreen';
+import NewAddressScreen from './screens/NewAddressScreen';
+import SetUpAddressScreen from './screens/SetUpAddressScreen';
+import ShopScreen from './screens/ShopScreen';
 export default function App() {
   return (
     <UserProvider>
       
-      <StackNavigator/>
+      <StackNavigator/> 
       <ModalPortal/>
     </UserProvider>
   );

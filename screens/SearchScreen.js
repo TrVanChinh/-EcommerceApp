@@ -101,12 +101,10 @@ const SearchScreen = ({ navigation, route }) => {
             data: { ...productData, imageUrl },
           });
         }
-
-        
-        console.log(product);
       }
     }
     setProduct(productsData);
+    console.log(product);
   };
 
   // Sắp xếp sản phẩm từ thấp đến cao
@@ -172,6 +170,15 @@ const SearchScreen = ({ navigation, route }) => {
         />
         <Feather name="filter" size={24} color="black" />
       </View>
+      {/* <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "center",
+          paddingHorizontal: 10,
+        }}
+      >
+
+      </View> */}
       <View
         style={{
           flexDirection: "row",
@@ -211,7 +218,6 @@ const SearchScreen = ({ navigation, route }) => {
             return (
               <TouchableOpacity
                 onPress={() => handleItem(item)}
-                // onPress={() => navigation.navigate('Register')}
                 style={{
                   justifyContent: "center",
                   alignItems: "center",

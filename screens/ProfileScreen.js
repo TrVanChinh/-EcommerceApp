@@ -31,62 +31,40 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 import { app } from "../firebase";
 import { useUser } from '../UserContext';
+import { db } from "../firebase";
 
 const ProfileScreen = ({ navigation }) => {
-  const { updateUser } = useUser();
+  const { updateUser, user } = useUser();
   const [isLogin, setLogin] = useState(null);
-  const [user, setUser] = useState(null);
-  const db = getFirestore(app);
+  const [dataUser, setDataUser] = useState(null);
+  const idUser = user?.user?.uid;
+  
   useEffect(() => {
-    const unsubscribe = auth().onAuthStateChanged((authenticatedUser) => {
-      setLogin(authenticatedUser);
-      console.log(isLogin); 
-      if (authenticatedUser) {
-        // Nếu user không null, tiến hành lấy dữ liệu
-        getUser(authenticatedUser);
-      }
-    });
-
-    // Hủy người nghe khi component unmount
-    return () => unsubscribe();
-  }, []);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      // Nếu màn hình được focus (được hiển thị), thực hiện các hành động cần thiết
-      const unsubscribe = auth().onAuthStateChanged((authenticatedUser) => {
-        setLogin(authenticatedUser);
-        if (authenticatedUser) {
-          getUser(authenticatedUser);
+    const fetchData = async () => {
+      try {
+        if (user) {
+          const docRef = doc(db, "user", idUser);
+          const docSnap = await getDoc(docRef);
+          console.log("dataUser", docSnap.data());
+          setDataUser(docSnap.data());
         }
-      });
-
-      // Hủy người nghe khi màn hình không còn được focus
-      return () => unsubscribe();
-    }, [])
-  );
- 
-  const getUser = async (authenticatedUser) => {
-    const docRef = doc(db, "user", authenticatedUser.uid);
-    const docSnap = await getDoc(docRef);
-    // console.log(docSnap.id);
-    setUser(docSnap.data());
-  }; 
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchData();
+  }, [user, idUser]);
 
   const handleLogout = () => {
     updateUser(null);
-    auth()
-      .signOut()
-      .then(() => console.log("Đã đăng xuất!"))
-      .catch((error) => alert("Vui lòng đăng nhập trước"));
     setLogin(null);
-    setUser(null)
+    setDataUser(null)
     navigation.navigate("Profile");
   };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView>
+        <ScrollView>
         <View style={styles.upperView}>
           <View style={styles.buttonContainer}>
             {/* nut cai dat */}
@@ -145,7 +123,7 @@ const ProfileScreen = ({ navigation }) => {
             style={{ flexDirection: "row", justifyContent: "space-between" }}
           >
             {/* Area avt, username */}
-            {isLogin && user ? (
+            { dataUser ? (
               <>
                 <View
                   style={{
@@ -161,7 +139,7 @@ const ProfileScreen = ({ navigation }) => {
                   >
                     <Image
                       source={{
-                        uri: user.photo || "https://icon2.cleanpng.com/20180514/xvw/kisspng-exotel-cloud-communications-privacy-policy-interac-5afa0479ea45a9.7590282815263345859596.jpg",
+                        uri: dataUser?.photo || null,
                       }}
                       style={styles.avt_image}
                     />
@@ -176,7 +154,7 @@ const ProfileScreen = ({ navigation }) => {
                         fontSize: 17,
                       }}
                     >
-                      {user.name}
+                      {dataUser?.name}
                     </Text>
                     <View
                       style={{
@@ -195,7 +173,7 @@ const ProfileScreen = ({ navigation }) => {
                         }}
                       >
                         Thành viên bạc
-                      </Text>
+                      </Text> 
                       <SimpleLineIcons
                         marginLeft={15}
                         padding={5}
@@ -253,7 +231,7 @@ const ProfileScreen = ({ navigation }) => {
           </View>
         </View>
         <View style={styles.lowerView}>
-          {user && user.seller ? (
+          {dataUser && dataUser.seller ? (
             <>
               {/* My shop */}
               <TouchableOpacity
@@ -298,9 +276,9 @@ const ProfileScreen = ({ navigation }) => {
               <TouchableOpacity
                 style={styles.list_items}
                 onPress={() =>
-                  user
+                  dataUser
                     ? navigation.navigate("Register Seller", {
-                        idUser: isLogin.uid,
+                        idUser: idUser,
                       })
                     : Alert.alert("Thông báo", "Vui lòng đăng nhập trước", [
                         {
@@ -348,9 +326,9 @@ const ProfileScreen = ({ navigation }) => {
           <TouchableOpacity
             style={styles.list_items}
             onPress={() =>
-              user
+              dataUser
                 ? navigation.navigate("EditUserInfo", {
-                    idUser: isLogin.uid,
+                    idUser: idUser,
                   })
                 : Alert.alert("Thông báo", "Vui lòng đăng nhập trước", [
                     {
@@ -394,9 +372,11 @@ const ProfileScreen = ({ navigation }) => {
             </View>
           </TouchableOpacity>
 
-          <Button title="Logout" onPress={handleLogout} disabled={!isLogin} />
+          <Button title="Logout" onPress={handleLogout} disabled={!dataUser} />
         </View>
       </ScrollView>
+      
+      
     </SafeAreaView>
   );
 };

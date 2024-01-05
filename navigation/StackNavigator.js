@@ -15,6 +15,13 @@ import DetailScreen from "../screens/DetailScreen"
 import SearchScreen from "../screens/SearchScreen"
 import CartScreen from "../screens/CartScreen";
 import SmsLoginScreen from "../screens/SmsLoginScreen";
+import OrderScreen from "../screens/OrderScreen";
+import AddressScreen from "../screens/AddressScreen";
+import NewAddressScreen from "../screens/NewAddressScreen";
+import SetUpAddressScreen from "../screens/SetUpAddressScreen";
+import UpdateAddressScreen from "../screens/UpdateAddressScreen";
+import ResetAddressScreen from "../screens/ResetAddressScreen";
+import ShopScreen from "../screens/ShopScreen";
 import {Entypo, AntDesign, Octicons , MaterialCommunityIcons, Ionicons, FontAwesome5  } from '@expo/vector-icons';
 const StackNavigator = () => {
   const Stack = createNativeStackNavigator();
@@ -116,9 +123,9 @@ const StackNavigator = () => {
         <Stack.Screen name="Main" component={BottomTabs} options={{headerShown:false}}/>
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Home" component={HomeScreen} options={{headerShown:false}}/>
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="SmsLogin" component={SmsLoginScreen} options={{headerShown:false}}/>
-        <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} options={{headerTitle: 'Đăng nhập'}}/>
+        <Stack.Screen name="SmsLogin" component={SmsLoginScreen}/>
+        <Stack.Screen name="Register" component={RegisterScreen} options={{headerTitle: 'Đăng ký'}}/>
         <Stack.Screen name="OTPScreen" component={OTPScreen} />
         <Stack.Screen name="Detail" component={DetailScreen} options={{headerShown:false}}/>
         <Stack.Screen name="Search" component={SearchScreen} options={{headerShown:false}}/>
@@ -133,8 +140,15 @@ const StackNavigator = () => {
                 <Text>Chỉnh sửa</Text>
               </TouchableOpacity>
             ),
-          }}
+          }} 
         />
+        <Stack.Screen name="Order" component={OrderScreen} options={{headerTitle: 'Đặt hàng'}}/>
+        <Stack.Screen name="Address" component={AddressScreen} options={{headerTitle: 'Chọn địa chỉ giao hàng'}}/>
+        <Stack.Screen name="NewAddress" component={NewAddressScreen} options={{headerTitle: 'Địa chỉ mới'}}/>
+        <Stack.Screen name="SetUpAddress" component={SetUpAddressScreen} options={{headerTitle: 'Thiết lập địa chỉ'}}/>
+        <Stack.Screen name="UpdateAddress" component={UpdateAddressScreen} options={{headerTitle: 'Cập nhật địa chỉ'}}/>
+        <Stack.Screen name="ResetAddress" component={ResetAddressScreen} options={{headerTitle: 'Đặt lại địa chỉ'}}/>
+        <Stack.Screen name="Shop" component={ShopScreen} options={{headerTitle: 'Xem Shop'}}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

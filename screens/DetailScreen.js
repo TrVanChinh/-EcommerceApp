@@ -9,7 +9,6 @@ import {
   Image,
   Dimensions,
   Pressable,
-  TextInput,
 } from "react-native";
 import React, { useState, useEffect, useLayoutEffect } from "react";
 import {
@@ -42,11 +41,14 @@ const DetailScreen = ({ navigation ,route }) => {
   const { product } = route.params;
   const [listImage, setListImage] = useState([]);
   const [shop, setShop] = useState([]);
+  const [option,setOption] = useState([])
+  const [idOption, setIdOption] = useState()
   const [quantity,setQuantity] = useState(1)
   const [modalVisible, setModalVisible] = useState(false);
   const productId = product.id;
   const ShopId = product.data.idShop;
   const { user } = useUser();
+  console.log(product)
   // console.log("infoUser",user.user.uid)
   // useLayoutEffect(() => {
   //   const GetImage = onSnapshot(
@@ -80,6 +82,24 @@ const DetailScreen = ({ navigation ,route }) => {
         console.error("Lỗi khi lấy dữ liệu ảnh:", error);
       }
     };
+
+    const GetOption = async () => {
+      try {
+        const optionQuery = query(
+          collection(doc(collection(db, "product"), productId), "option")
+        );
+        const snapshot = await getDocs(optionQuery);
+        const options = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          data: doc.data(),
+        }));
+        setOption(options);
+        console.log(options)
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu ảnh:", error);
+      }
+    };
+
     const fetchShopData = async () => {
       try {
         const userDocRef = doc(db, "user", ShopId);
@@ -95,13 +115,13 @@ const DetailScreen = ({ navigation ,route }) => {
         console.error("Lỗi khi lấy dữ liệu:", error);
       }
     };
-
+ 
     fetchShopData();
     GetImage();
+    GetOption();
   }, [productId, ShopId]);
-  console.log(shop.data);
 
-  const addToCart = async (userId, productId, quantity) => {
+  const addToCart = async (userId, productId, optionProductId, quantity) => {
       try {
         // Kiểm tra xem người dùng đã có giỏ hàng chưa
         const userDocRef = doc(db, 'user', userId);
@@ -110,7 +130,7 @@ const DetailScreen = ({ navigation ,route }) => {
         if (userDocSnapshot.exists()) {
           // Nếu người dùng đã có giỏ hàng, thêm sản phẩm vào giỏ hàng
           const cartCollectionRef = collection(userDocRef, 'cart');
-          const productDocRef = doc(cartCollectionRef, productId);
+          const productDocRef = doc(cartCollectionRef, optionProductId);
 
           const productDocSnapshot = await getDoc(productDocRef);
           if (productDocSnapshot.exists()) {
@@ -122,6 +142,7 @@ const DetailScreen = ({ navigation ,route }) => {
             // Nếu sản phẩm chưa tồn tại trong giỏ hàng, thêm mới vào giỏ hàng
             await setDoc(productDocRef, {
               productId,
+              optionProductId,
               quantity,
             });
           }
@@ -132,10 +153,13 @@ const DetailScreen = ({ navigation ,route }) => {
         }
       } catch (error) {
         console.error('Lỗi khi thêm sản phẩm vào giỏ hàng:', error);
-      
     }
-    
   };
+
+  const handleShop = () => {
+    navigation.navigate("Shop", {shop});
+  };
+
   return (
     <>
       <SafeAreaView style={{ flex: 1 }}>
@@ -178,6 +202,7 @@ const DetailScreen = ({ navigation ,route }) => {
               {listImage.map((slide, index) => {
                 return (
                   <View
+                  key={index}
                     style={{
                       backgroundColor:
                         selectIndex == index ? "#8e8e8e" : "#f2f2f2",
@@ -277,7 +302,7 @@ const DetailScreen = ({ navigation ,route }) => {
                   }}
                 />
                 <Text style={{ fontWeight: "bold", paddingLeft: 10 }}>
-                  {shop.data.name}
+                  {shop.data.shopName}
                 </Text>
                 <TouchableOpacity
                   style={{
@@ -289,6 +314,7 @@ const DetailScreen = ({ navigation ,route }) => {
                     borderWidth: 1,
                     borderColor: "#F1582C",
                   }}
+                  onPress={() => handleShop()}
                 >
                   <Text style={{ color: "#F1582C", fontSize: 16 }}>
                     Xem shop
@@ -392,7 +418,7 @@ const DetailScreen = ({ navigation ,route }) => {
         visible={modalVisible}
         onTouchOutside={() => setModalVisible(!modalVisible)}
       >
-        <ModalContent style={{ width: "100%", height: 400, alignItems:'center' }}>
+        <ModalContent style={{ width: "100%", height: height/1.6, alignItems:'center' }}>
           
               {/* <View
                 style={{
@@ -403,9 +429,30 @@ const DetailScreen = ({ navigation ,route }) => {
                   borderRadius: 7,
                 }}
               > */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '90%' }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 10, }}>
-                <Text>Số lượng:</Text>
+            <View style={{  justifyContent: 'space-between', width: '90%' }}>
+            <Text>Lựa chọn:</Text>
+              <FlatList
+                style={{height:height/2.4,}}
+                data={option}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <View style={{marginTop:10, backgroundColor: idOption === item.id ? "#f95122" : "white"}}>
+                  <Pressable 
+                    onPress={() => {
+                      setIdOption(item.id);
+                    }}
+                    style={{flexDirection:'row', alignItems:'center', borderWidth: 0.5, borderColor: "#D8D8D8", padding:5,  }}>
+                    <Image
+                      style={{ width: 50, height: 50}}
+                      source={{uri: item.data.image}}
+                    />
+                    <Text style={{ fontSize: 14 , color: idOption === item.id ? "white" : "black"}}>{item.data.name}</Text>
+                  </Pressable>
+                  </View>
+                )}
+              />
+              <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 10,}}>
+                <Text>Số lượng:      </Text>
                 {quantity > 1 ? (
                   <Pressable
                     onPress={() => setQuantity(quantity-1)}
@@ -460,10 +507,12 @@ const DetailScreen = ({ navigation ,route }) => {
                   height: 40,
                   alignItems:'center',
                   justifyContent:'center',
-                  backgroundColor: "red",
+                  backgroundColor: idOption ? "red" : "gray",
                 }} 
                 onPress={() => {
-                  user !== null ? addToCart(user.user.uid,productId,quantity) :  navigation.navigate('Login'), setModalVisible(!modalVisible) 
+                  if (idOption) {
+                    user !== null ? addToCart(user.user.uid, productId, idOption , quantity) : navigation.navigate('Login'), setModalVisible(!modalVisible);
+                  }                
                 }}
               >
                 <Text  style={{ color:"white"}}>Thêm vào giỏ hàng</Text>

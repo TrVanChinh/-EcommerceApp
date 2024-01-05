@@ -16,8 +16,10 @@ import { Input, Icon } from "react-native-elements";
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
 import { firebaseConfig } from '../firebase'
 import firebase from 'firebase/compat/app'
- 
+import { useUser } from '../UserContext';
+
 const SmsLoginScreen = ({navigation}) => {
+  const { updateUser } = useUser();
   const [phoneNumber, setPhoneNumber] = useState('')
   const [code, setCode] = useState('')
   const [verificationId, setVerificationId] = useState(null)
@@ -63,16 +65,18 @@ const SmsLoginScreen = ({navigation}) => {
             verificationId,
             code
           );
-          await firebase.auth().signInWithCredential(credential);
-      
+          const userCredential = await firebase.auth().signInWithCredential(credential);
+          updateUser(userCredential) 
+          console.log(userCredential)
           const uid = firebase.auth().currentUser.uid;
           const userRef = firebase.firestore().collection("user").doc(uid);
           const userDoc = await userRef.get();
       
           if (!userDoc.exists) {
             await userRef.set({
-              name: "User",
+              name: "User", 
               mobileNo: phoneNumber, 
+              photo: "https://icon2.cleanpng.com/20180514/xvw/kisspng-exotel-cloud-communications-privacy-policy-interac-5afa0479ea45a9.7590282815263345859596.jpg"
             });
           }
       
@@ -108,13 +112,13 @@ const SmsLoginScreen = ({navigation}) => {
             onChangeText={(text) => setPhoneNumber(text)}
             keyboardType="phone-pad"
             autoComplete="tel"
-            leftIcon={<Feather name="phone" size={24} color="black" />}
+            leftIcon={<Feather name="phone" size={24} color="#857E7C" />}
             rightIcon={
               phoneNumber ? (
                 <AntDesign
                   name="close"
                   size={24}
-                  color="black"
+                  color="#857E7C"
                   onPress={clearInput}
                 />
               ) : null

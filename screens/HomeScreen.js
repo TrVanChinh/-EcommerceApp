@@ -12,7 +12,6 @@ const HomeScreen = ({ navigation }) => {
     const { user } = useUser();
 
     useEffect(() => {
-        // Thực hiện các hành động cần thiết dựa trên thông tin người dùng
         if (user) {
           console.log('User information:', user);
         }
@@ -248,7 +247,9 @@ const HomeScreen = ({ navigation }) => {
                     <AntDesign name="camerao" size={24} color="#857E7C" />
                 </View>
                 <Pressable
-                    onPress={()=>navigation.navigate('Cart')}
+                    onPress={()=> {
+                        user ? navigation.navigate('Cart') :  navigation.navigate('Login')    
+                    }}
                 >
                     <AntDesign name="shoppingcart" size={24} color="white" padding={10}/>
                 </Pressable>
