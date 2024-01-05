@@ -41,9 +41,12 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import { useFocusEffect } from "@react-navigation/native";
-import { endAsyncEvent, setEnabled } from "react-native/Libraries/Performance/Systrace";
+import {
+  endAsyncEvent,
+  setEnabled,
+} from "react-native/Libraries/Performance/Systrace";
 
-const EditProductScreen = ({ navigation,route }) => {
+const EditProductScreen = ({ navigation, route }) => {
   const { idProduct: idProduct } = route.params;
   const db = getFirestore();
   const [product, setProduct] = useState("");
@@ -117,45 +120,36 @@ const EditProductScreen = ({ navigation,route }) => {
   }, [product]);
 
   useEffect(() => {
-    setEditNameSubcate(nameSubcategory)
-  }, [nameSubcategory])
+    setEditNameSubcate(nameSubcategory);
+  }, [nameSubcategory]);
 
-  useEffect(() => {    
-    // console.log(categories[0])
-    
-    // getNameSubcate()
-  }, [categories])
+  useEffect(() => {}, [categories]);
 
+  useEffect(() => {}, [editNameSubcate]);
   useEffect(() => {
+    getNameSubcate();
+  }, [editIDSubcate]);
+  useEffect(() => {}, [editNameSubcate]);
 
-  }, [editNameSubcate])
-  useEffect(() => {
-    getNameSubcate();    
-  }, [editIDSubcate])
-  useEffect(() => {
-    
-  }, [editNameSubcate])
-  
-  
-  const getNameSubcate=()=>{  
+  const getNameSubcate = () => {
     categories.forEach(async (c) => {
       const subcateDoc = await getDocs(
         collection(db, "category", c.idCate, "subcategory")
-      ); 
+      );
       subcateDoc.forEach((d) => {
-        if(d.id==editIDSubcate) {
-          setEditNameSubcate(d.data().name)
+        if (d.id == editIDSubcate) {
+          setEditNameSubcate(d.data().name);
         }
       });
     });
-  } 
+  };
   const getProduct = async () => {
     try {
-      //Get Thông tin sản phẩm 
+      //Get Thông tin sản phẩm
       const docRef = doc(db, "product", idProduct);
       const docSnap = await getDoc(docRef);
       setProduct(docSnap.data());
-      setEditIDSubcate(docSnap.data().idSubCategory)
+      setEditIDSubcate(docSnap.data().idSubCategory);
 
       //Lấy image
       const listImage = [];
@@ -167,19 +161,6 @@ const EditProductScreen = ({ navigation,route }) => {
         listImage.push(doc.data().url);
       });
       setImages(listImage);
-      // getNameSubcate()
-      // //Lấy tên category
-      // categories.forEach(async (doc) => {
-      //   const subcateDoc = await getDocs(
-      //     collection(db, "category", doc.idCate, "subcategory")
-      //   ); 
-      //   subcateDoc.forEach((d) => {
-      //     if(d.id===editIDSubcate){
-      //       setEditNameSubcate(d.data().name)
-      //       console.log("subcate", d.data().name) 
-      //     }
-      //   });
-      // });
       //Lấy Option
       const listLoaiHang = [];
       const loaiHangSnap = await getDocs(
@@ -201,7 +182,7 @@ const EditProductScreen = ({ navigation,route }) => {
     }
   };
 
-  const addProduct = async () => {
+  const updateProduct = async () => {
     const inputValues = [name, descript, idSubcategory];
     if (areInputsFilled(inputValues)) {
       if (itemLoaiHang.length == 0 && !areInputsFilled([price, quantity])) {
@@ -623,7 +604,10 @@ const EditProductScreen = ({ navigation,route }) => {
       {/* Danh muc */}
       <TouchableOpacity
         onPress={() =>
-          navigation.navigate("SelectCategory", { categories: categories,isUpdate:true })
+          navigation.navigate("SelectCategory", {
+            categories: categories,
+            isUpdate: true,
+          })
         }
         style={[styles.list_items, { marginVertical: 5 }]}
       >
@@ -819,13 +803,17 @@ const EditProductScreen = ({ navigation,route }) => {
             ]}
           >
             {/* Cột bên trái */}
-            {item.loaiHangImg.map((image, index) => (
-              <Image
-                key={index}
-                source={{ uri: image }}
-                style={{ height: 50, width: 50 }}
-              />
-            ))}
+            {item.loaiHangImg.map((image, index) =>
+              image ? (
+                <Image
+                  key={index}
+                  source={{ uri: image }}
+                  style={{ height: 50, width: 50 }}
+                />
+              ) : (
+                <></>
+              )
+            )}
 
             {/* Cột giữa */}
             <View
@@ -953,8 +941,8 @@ const EditProductScreen = ({ navigation,route }) => {
       </View>
       {/* Button Thêm */}
       <TouchableOpacity
-        style={{ backgroundColor: color.origin, marginHorizontal: 100 }}
-        onPress={addProduct}
+        style={{ backgroundColor: color.origin, marginHorizontal: 100 , marginBottom:20}}
+        onPress={updateProduct}
       >
         <View
           style={{ alignItems: "center", justifyContent: "center", height: 35 }}

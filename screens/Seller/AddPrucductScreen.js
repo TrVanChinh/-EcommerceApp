@@ -49,7 +49,7 @@ const AddProductScreen = ({ navigation, route }) => {
   const [urlImage, setUrlImage] = useState([]);
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("");
-  const [userId, setUser] = useState(null);
+  const [idUser, setUser] = useState(null);
   const storage = getStorage();
   const [categories, setCategory] = useState([]);
   const { idSubcategory, nameSubcategory } = route.params || {};
@@ -114,7 +114,7 @@ const AddProductScreen = ({ navigation, route }) => {
         const productRef = await addDoc(collection(db, "product"), {
           name: name,
           description: descript,
-          idShop: userId,
+          idShop: idUser,
           sold: 0,
           idSubCategory: idSubcategory,
           discount: "",
@@ -162,7 +162,7 @@ const AddProductScreen = ({ navigation, route }) => {
           {
             text: "OK",
             onPress: () => {
-              navigation.navigate("MyShop");
+              navigation.navigate("MyShop",{idUser:idUser});
             },
           },
         ]);
@@ -219,7 +219,7 @@ const AddProductScreen = ({ navigation, route }) => {
         const blob = await response.blob();
 
         // Tạo tên file
-        const filename = userId + `_${index + 1}_${getCurrentTimestamp()}.jpg`;
+        const filename = idUser + `_${index + 1}_${getCurrentTimestamp()}.jpg`;
 
         const imageRef = ref(storageRef, filename);
 

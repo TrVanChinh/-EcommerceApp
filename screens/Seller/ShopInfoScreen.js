@@ -239,7 +239,7 @@ const ShopInfoScreen = ({navigation, route}) => {
           )}
           <View style={styles.list_items}>
             <View style={{ flexDirection: "row" }}>
-              <Text style={{ marginLeft: 10, fontSize: 16 }}>Tên tài khoản</Text>
+              <Text style={{ marginLeft: 10, fontSize: 16 }}>Tên cửa hàng</Text>
               <Text style={{ color: "red" }}>*</Text>
             </View>
             <TextInput style={styles.input} onChangeText={setShopName} value={shopName} />

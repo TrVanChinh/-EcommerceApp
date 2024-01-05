@@ -227,7 +227,7 @@ const StackNavigator = () => {
             headerTitleAlign: "center", 
           }} 
         />
-        <Stack.Screen name="EditProduct" component={EditProductScreen} option={{
+        <Stack.Screen name="EditProduct" component={EditProductScreen} options={{
             headerTitle: "Cập nhật sản phẩm",          
             headerTitleAlign: "center", 
         }}
