@@ -30,41 +30,64 @@ import {
 } from "firebase/firestore";
 import { useFocusEffect } from "@react-navigation/native";
 import { app } from "../firebase";
-import { useUser } from '../UserContext';
-import { db } from "../firebase";
 
 const ProfileScreen = ({ navigation }) => {
-  const { updateUser, user } = useUser();
   const [isLogin, setLogin] = useState(null);
-  const [dataUser, setDataUser] = useState(null);
-  const idUser = user?.user?.uid;
-  
+  const [user, setUser] = useState(null);
+  const db = getFirestore(app);
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        if (user) {
-          const docRef = doc(db, "user", idUser);
-          const docSnap = await getDoc(docRef);
-          console.log("dataUser", docSnap.data());
-          setDataUser(docSnap.data());
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
+    if(user){
+      const unsubscribe = auth().onAuthStateChanged((authenticatedUser) => {
+      setLogin(authenticatedUser);
+      // console.log(isLogin);
+      if (authenticatedUser) {
+        // Nếu user không null, tiến hành lấy dữ liệu
+        getUser(authenticatedUser);
       }
-    };
-    fetchData();
-  }, [user, idUser]);
+    });
+
+    // Hủy người nghe khi component unmount
+    return () => unsubscribe();
+    }
+    
+  }, []);
+  
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // Nếu màn hình được focus (được hiển thị), thực hiện các hành động cần thiết
+      const unsubscribe = auth().onAuthStateChanged((authenticatedUser) => {
+        setLogin(authenticatedUser);
+        if (authenticatedUser) {
+          getUser(authenticatedUser);
+        }
+      });
+
+      // Hủy người nghe khi màn hình không còn được focus
+      return () => unsubscribe();
+    }, [])
+  );
+
+  const getUser = async (authenticatedUser) => {
+    const docRef = doc(db, "user", authenticatedUser.uid);
+    const docSnap = await getDoc(docRef);
+    // console.log(docSnap.id);
+    setUser(docSnap.data());
+  };
 
   const handleLogout = () => {
-    updateUser(null);
+    auth()
+      .signOut()
+      .then(() => console.log("Đã đăng xuất!"))
+      // .catch((error) => alert("Vui lòng đăng nhập trước"));
     setLogin(null);
-    setDataUser(null)
+    setUser(null);
     navigation.navigate("Profile");
   };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView>
+      <ScrollView>
         <View style={styles.upperView}>
           <View style={styles.buttonContainer}>
             {/* nut cai dat */}
@@ -123,7 +146,7 @@ const ProfileScreen = ({ navigation }) => {
             style={{ flexDirection: "row", justifyContent: "space-between" }}
           >
             {/* Area avt, username */}
-            { dataUser ? (
+            {isLogin && user ? (
               <>
                 <View
                   style={{
@@ -139,7 +162,7 @@ const ProfileScreen = ({ navigation }) => {
                   >
                     <Image
                       source={{
-                        uri: dataUser?.photo || null,
+                        uri: user.photo,
                       }}
                       style={styles.avt_image}
                     />
@@ -154,7 +177,7 @@ const ProfileScreen = ({ navigation }) => {
                         fontSize: 17,
                       }}
                     >
-                      {dataUser?.name}
+                      {user.name}
                     </Text>
                     <View
                       style={{
@@ -173,7 +196,7 @@ const ProfileScreen = ({ navigation }) => {
                         }}
                       >
                         Thành viên bạc
-                      </Text> 
+                      </Text>
                       <SimpleLineIcons
                         marginLeft={15}
                         padding={5}
@@ -231,12 +254,150 @@ const ProfileScreen = ({ navigation }) => {
           </View>
         </View>
         <View style={styles.lowerView}>
-          {dataUser && dataUser.seller ? (
-            <>
+          {!user?
+          <>
+          {/* Dang ki ban hang */}
+          <TouchableOpacity
+                style={styles.list_items}
+                onPress={() =>                    
+          Alert.alert("Thông báo", "Vui lòng đăng nhập trước", [
+            {
+              text: "OK",
+              onPress: () => {
+                navigation.navigate("Login");
+              },
+            },
+          ])                  
+                }
+              >
+                <View
+                  style={{
+                    alignItems: "flex-start",
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <Entypo
+                    name="shop"
+                    size={25}
+                    marginLeft={10}
+                    color={color.origin}
+                  />
+                  <Text style={{ marginLeft: 10 }}> Bắt đầu bán</Text>
+                </View>
+                <View
+                  style={{
+                    alignItems: "flex-end",
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text> Đăng kí ngay</Text>
+                  <SimpleLineIcons
+                    marginLeft={15}
+                    name="arrow-right"
+                    size={10}
+                    color="#60698a"
+                  />
+                </View>
+              </TouchableOpacity>
+              </>
+          :user.status==null?
+          //Chuyen sang man hinh dang ky seller
+          <>
+          
+              {/* Dang ki ban hang */}
+              <TouchableOpacity
+                style={styles.list_items}
+                onPress={() =>
+                    navigation.navigate("Register Seller", {
+                        idUser: isLogin.uid,
+                      })                    
+                }
+              >
+                <View
+                  style={{
+                    alignItems: "flex-start",
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <Entypo
+                    name="shop"
+                    size={25}
+                    marginLeft={10}
+                    color={color.origin}
+                  />
+                  <Text style={{ marginLeft: 10 }}> Bắt đầu bán</Text>
+                </View>
+                <View
+                  style={{
+                    alignItems: "flex-end",
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text> Đăng kí ngay</Text>
+                  <SimpleLineIcons
+                    marginLeft={15}
+                    name="arrow-right"
+                    size={10}
+                    color="#60698a"
+                  />
+                </View>
+              </TouchableOpacity>
+          </>
+          :
+            user.status===false?
+            //Thông báo chưa duyệt
+            <>            
+            <TouchableOpacity
+                style={styles.list_items}
+                onPress={() =>
+                    Alert.alert("Đã đăng ký","Yêu cầu đang được phê duyệt")                 
+                }
+              >
+                <View
+                  style={{
+                    alignItems: "flex-start",
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <Entypo
+                    name="shop"
+                    size={25}
+                    marginLeft={10}
+                    color={color.origin}
+                  />
+                  <Text style={{ marginLeft: 10 }}> Đã đăng ký bán hàng</Text>
+                </View>
+                <View
+                  style={{
+                    alignItems: "flex-end",
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text> Đang duyệt</Text>
+                  <SimpleLineIcons
+                    marginLeft={15}
+                    name="arrow-right"
+                    size={10}
+                    color="#60698a"
+                  />
+                </View>
+              </TouchableOpacity>
+            </>
+            :
+              user.seller?
+              //Chuyển sang MyShopScreen
+              <>
+              
               {/* My shop */}
               <TouchableOpacity
                 style={styles.list_items}
-                onPress={() => navigation.navigate("MyShop")}
+                onPress={() => navigation.navigate("MyShop", {idUser: isLogin.uid})}
               >
                 <View
                   style={{
@@ -269,26 +430,28 @@ const ProfileScreen = ({ navigation }) => {
                   />
                 </View>
               </TouchableOpacity>
-            </>
-          ) : (
-            <>
-              {/* Dang ki ban hang */}
+              </>
+              :
+              //Thông báo từ chối và đăng ký lại
+              <>              
               <TouchableOpacity
                 style={styles.list_items}
-                onPress={() =>
-                  dataUser
-                    ? navigation.navigate("Register Seller", {
-                        idUser: idUser,
-                      })
-                    : Alert.alert("Thông báo", "Vui lòng đăng nhập trước", [
-                        {
-                          text: "OK",
-                          onPress: () => {
-                            navigation.navigate("Login");
-                          },
-                        },
-                      ])
-                }
+                onPress={() => 
+                  Alert.alert(
+                    'Quản trị viên đã từ chối yêu cầu',
+                    'Đăng ký lại?',
+                    [
+                      { text: 'No', 
+                      style: 'cancel' },
+                      { text: 'Yes', 
+                      onPress: () => {
+                        navigation.navigate("Register Seller", {
+                          idUser: isLogin.uid,
+                        })
+                      } },
+                    ],
+                    { cancelable: false }
+                  )}
               >
                 <View
                   style={{
@@ -312,7 +475,7 @@ const ProfileScreen = ({ navigation }) => {
                     alignItems: "center",
                   }}
                 >
-                  <Text> Đăng kí miễn phí</Text>
+                  <Text> Đăng ký ngay </Text>
                   <SimpleLineIcons
                     marginLeft={15}
                     name="arrow-right"
@@ -321,14 +484,14 @@ const ProfileScreen = ({ navigation }) => {
                   />
                 </View>
               </TouchableOpacity>
-            </>
-          )}
+              </>
+        }
           <TouchableOpacity
             style={styles.list_items}
             onPress={() =>
-              dataUser
+              user
                 ? navigation.navigate("EditUserInfo", {
-                    idUser: idUser,
+                    idUser: isLogin.uid,
                   })
                 : Alert.alert("Thông báo", "Vui lòng đăng nhập trước", [
                     {
@@ -372,14 +535,13 @@ const ProfileScreen = ({ navigation }) => {
             </View>
           </TouchableOpacity>
 
-          <Button title="Logout" onPress={handleLogout} disabled={!dataUser} />
+          <Button title="Logout" onPress={handleLogout} disabled={!isLogin} />
         </View>
       </ScrollView>
-      
-      
     </SafeAreaView>
   );
 };
+
 
 export default ProfileScreen;
 
