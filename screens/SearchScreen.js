@@ -29,6 +29,7 @@ import {
   Ionicons,
   Feather,
 } from "@expo/vector-icons";
+import color from "../components/color"
 
 const SearchScreen = ({ navigation, route }) => {
   //   const searchInfo = route.params;
@@ -37,6 +38,7 @@ const SearchScreen = ({ navigation, route }) => {
   const [searchText, setSearchText] = useState("");
   const [product, setProduct] = useState([]);
   const [arrange, setArrange] = useState(false);
+  const [searchStatus, setSearchStatus] = useState(true)
   // const fetchData = async () => {
   //   //sử dụng toán tử array-contains của Firestore
   //   const q = query(collection(db, "product"), where("name", ">=", searchText),where("name", "<=", searchText + '\uf8ff'))
@@ -53,40 +55,18 @@ const SearchScreen = ({ navigation, route }) => {
     .replace(/[\u0300-\u036f]/g, ""); // Loại bỏ dấu
   }
 
-  // const fetchData = async () => {
-  //   const normalizedSearchText = normalizeString(searchText);
-  //   const q = query(collection(db, "product"));
-  //   const querySnapshot = await getDocs(q);
-  //   const productsData = [];
-  //   querySnapshot.forEach((doc) => {
-  //     const normalizedProductName = normalizeString(doc.data().name);
-  //     // Kiểm tra xem chuỗi tìm kiếm có tồn tại trong tên sản phẩm không
-  //     if (normalizedProductName.includes(normalizedSearchText)) {
-  //       const productId = doc.id;
-  //       const productData = doc.data();
-  //       const imageSnapshot = await getDocs(collection(doc(db, 'product', productId), 'image'));
-  //         if (imageSnapshot.docs.length > 0) {
-  //           const imageUrl = imageSnapshot.docs[0].data().url;
-  //           productsData.push({
-  //             id: productId,
-  //             data: { ...productData, imageUrl },
-  //           });
-  //           }
-  //       console.log(productId);
-  //     }
-  //   });
-  // };
-
   const fetchData = async () => {
     const normalizedSearchText = normalizeString(searchText);
     const q = query(collection(db, "product"));
     const querySnapshot = await getDocs(q);
     const productsData = [];
+    const ProductDataSuggests = [];
 
     for (const doc of querySnapshot.docs) {
       const normalizedProductName = normalizeString(doc.data().name);
 
       if (normalizedProductName.includes(normalizedSearchText)) {
+
         const productId = doc.id;
         const productData = doc.data();
 
@@ -101,10 +81,58 @@ const SearchScreen = ({ navigation, route }) => {
             data: { ...productData, imageUrl },
           });
         }
+      } else {
+        // kiểm tra normalizedSearchText có chứa dấu cách không
+        const hasSpace = normalizedSearchText.includes(" ");
+        if (hasSpace) {
+          const searchParts = normalizedSearchText.split(" ");
+          if (normalizedProductName.includes(searchParts[0])) {
+
+            const productId = doc.id;
+            const productData = doc.data();
+    
+            const imageSnapshot = await getDocs(
+              collection(db, "product", productId, "image")
+            );
+    
+            if (imageSnapshot.docs.length > 0) {
+              const imageUrl = imageSnapshot.docs[0].data().url;
+              ProductDataSuggests.push({
+                id: productId,
+                data: { ...productData, imageUrl },
+              });
+            }
+          }
+        } else {
+          const firstLetter = normalizedSearchText[0];
+          if (normalizedProductName.includes(firstLetter)) {
+
+            const productId = doc.id;
+            const productData = doc.data();
+    
+            const imageSnapshot = await getDocs(
+              collection(db, "product", productId, "image")
+            );
+    
+            if (imageSnapshot.docs.length > 0) {
+              const imageUrl = imageSnapshot.docs[0].data().url;
+              ProductDataSuggests.push({
+                id: productId,
+                data: { ...productData, imageUrl },
+              });
+            }
+          }
+            
+        }
       }
     }
-    setProduct(productsData);
-    console.log(product);
+    if(productsData.length !== 0) {
+      setSearchStatus(true)
+      setProduct(productsData);
+    } else {
+      setSearchStatus(false)
+      setProduct(ProductDataSuggests)
+    }
   };
 
   // Sắp xếp sản phẩm từ thấp đến cao
@@ -187,17 +215,17 @@ const SearchScreen = ({ navigation, route }) => {
         }}
       >
         <Pressable style={styles.buttonArrange}>
-          <Text>Mới nhất</Text>
+          <Text style={{ color: color.origin}}>Mới nhất</Text>
         </Pressable>
         <Pressable style={styles.buttonArrange}>
-          <Text>Bán chạy</Text>
+          <Text style={{ color: color.origin}}>Bán chạy</Text>
         </Pressable>
         {arrange ? (
           <Pressable
             style={styles.buttonArrange}
             onPress={() => sortProductsByLowToHigh(product)}
           >
-            <Text>Giá</Text>
+            <Text style={{ color: color.origin, paddingRight:2}}>Giá</Text>
             <AntDesign name="caretdown" size={24} color="black" />
           </Pressable>
         ) : (
@@ -205,12 +233,13 @@ const SearchScreen = ({ navigation, route }) => {
             style={styles.buttonArrange}
             onPress={() => sortProductsByHighToLow(product)}
           >
-            <Text>Giá</Text>
-            <AntDesign name="caretup" size={24} color="black" />
+            <Text style={{ color: color.origin, paddingRight:2}}>Giá</Text>
+            <AntDesign name="caretup" size={24} color= {color.origin} />
           </Pressable>
         )}
       </View>
-      <View style={{ flex: 1 }}>
+      {searchStatus ? (
+        <View style={{ flex: 1 }}>
         <FlatList
           numColumns={2}
           data={product}
@@ -275,6 +304,80 @@ const SearchScreen = ({ navigation, route }) => {
           }}
         ></FlatList>
       </View>
+      ) : (
+        <View style={{ flex: 1 }}>
+        <View style = {{ width: width, height: height/7, alignItems:'center', justifyContent:'center'}}>
+          <Text style={{ color: color.origin }}>Không tìm thấy sản phẩm nào</Text>
+        </View>
+        <View style={{ padding: 10, borderTopWidth:0.5,  }}>
+          <Text style={{ fontSize:16 , color: color.origin}}>Có thể bạn cũng thích</Text>
+        </View>
+        <FlatList
+          numColumns={2}
+          data={product}
+          renderItem={({ item }) => {
+            return (
+              <TouchableOpacity
+                onPress={() => handleItem(item)}
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  paddingLeft: 5,
+                }}
+              >
+                <View
+                  style={{
+                    width: width / 2,
+                  }}
+                >
+                  <Image
+                    style={{
+                      width: width / 2.5,
+                      height: height / 4,
+                      resizeMode: "cover",
+                      borderRadius: 25,
+                      margin: 10,
+                    }}
+                    source={{
+                      uri: item.data.imageUrl,
+                    }}
+                  />
+                  <View
+                    style={{
+                      width: 50,
+                      position: "absolute",
+                      marginTop: 20,
+                      alignItems: "flex-end",
+                      backgroundColor: "red",
+                    }}
+                  >
+                    <Text style={{ color: "yellow" }}>
+                      {item.data.discount}%
+                    </Text>
+                  </View>
+                </View>
+                <View style={{ width: width / 2 }}>
+                  <Text
+                    numberOfLines={1}
+                    style={{ fontSize: 15, color: "red" }}
+                  >
+                    {item.data.name}
+                  </Text>
+                </View>
+                <View style={{ width: 100, paddingBottom: 10 }}>
+                  <Text
+                    style={{ textAlign: "center", fontSize: 20, color: "red" }}
+                  >
+                    {item.data.price}đ
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          }}
+        ></FlatList>
+      </View>
+      )}
+      
     </View>
   );
 };
