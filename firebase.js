@@ -1,11 +1,12 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore,collection,  addDoc ,getDoc } from "firebase/firestore";
 import "firebase/firestore";
 // import { firebase } from "@react-native-firebase/app";
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD20fVX3gIrGIIrFFKIz-GINoIxPtub97c",
@@ -20,8 +21,11 @@ const firebaseConfig = {
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig)
 }
+
+// const analytics = getAnalytics(app);
+const storage = getStorage(app);
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const firebaseDatabase = getFirestore(app)
 const db = firebase.firestore();
-export {firebaseConfig, firebaseDatabase, db}  
+export {firebaseConfig, firebaseDatabase, db,app,storage, getFirestore, collection, addDoc, getDoc}

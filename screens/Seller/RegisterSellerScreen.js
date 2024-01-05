@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, TextInput, Alert ,ActivityIndicator} from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { SimpleLineIcons, Entypo } from "@expo/vector-icons";
 import { Button } from "react-native-elements";
@@ -15,12 +15,36 @@ import {
 } from "firebase/firestore";
 const RegisterSellerScreen = ({ navigation, route }) => {
   const [shopName, onChangeShopName] = useState("");
-  const [address, onChangeText] = useState("");
-  const [email, onChangeEmail] = useState("");
-  const [phone, onChangePhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [shopDescript, setShopDescript] = useState("");
+  const [phone, setPhoneNumber] = useState("");
   const { idUser: idUser } = route.params || {};
   const db = getFirestore();
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    getUser();
+  }, []);
+  const getUser = async () => {
+    try {
+      const docRef = doc(db, "user", idUser);
+      const docSnap = await getDoc(docRef);
+      console.log(docSnap.id);
+
+      // Set state only when data is available
+      setUser(docSnap.data());
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+  useEffect(() => {
+    if (user) {
+      onChangeShopName(user.shopName);
+      setAddress(user.address);
+      setShopDescript(user.shopDescript);
+    }
+  }, [user]);
 
   const setToSeller = async () => {
     try {
@@ -32,16 +56,15 @@ const RegisterSellerScreen = ({ navigation, route }) => {
         const docRef = doc(db, "user", idUser);
         setLoading(true);
         await updateDoc(docRef, {
-          seller: true,
-          address: address,
           shopName: shopName,
+          seller: false,
+          status:false,
+          address: address,
+          shopDescript:shopDescript
         });
         const updatedDocSnap = await getDoc(docRef);
         setLoading(false);
         if (updatedDocSnap.exists()) {
-          const isSeller = updatedDocSnap.data().seller;
-
-          if (isSeller) {
             // Hiển thị thông báo nếu cập nhật thành công
             Alert.alert("Thông báo", "Đăng ký bán hàng thành công", [
               {
@@ -51,12 +74,6 @@ const RegisterSellerScreen = ({ navigation, route }) => {
                 },
               },
             ]);
-          } else {
-            console.error(
-              "Cập nhật không thành công. Trường 'seller' không phải là true."
-            );
-            setLoading(false);
-          }
         } else {
           console.error("Dữ liệu không tồn tại sau khi cập nhật.");
           setLoading(false);
@@ -91,32 +108,21 @@ const RegisterSellerScreen = ({ navigation, route }) => {
           </View>
           <TextInput
             style={styles.input}
-            onChangeText={onChangeText}
+            onChangeText={setAddress}
             value={address}
           />
         </View>
 
         <View style={styles.list_items}>
           <View style={{ flexDirection: "row" }}>
-            <Text style={{ marginLeft: 10, fontSize: 16 }}>Email</Text>
+            <Text style={{ marginLeft: 10, fontSize: 16 }}>Mô tả cho cửa hàng</Text>
             <Text style={{ color: "red" }}>*</Text>
           </View>
           <TextInput
             style={styles.input}
-            onChangeText={onChangeEmail}
-            value={email}
-          />
-        </View>
-
-        <View style={styles.list_items}>
-          <View style={{ flexDirection: "row" }}>
-            <Text style={{ marginLeft: 10, fontSize: 16 }}>Điện thoại</Text>
-            <Text style={{ color: "red" }}>*</Text>
-          </View>
-          <TextInput
-            style={styles.input}
-            onChangeText={onChangePhone}
-            value={phone}
+            onChangeText={setShopDescript}
+            value={shopDescript}
+            maxLength={200}
           />
         </View>
       </View>

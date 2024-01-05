@@ -2,12 +2,14 @@ import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Button,
+  Switch,
   Image,
   View,
   TextInput,
   Text,
   Alert,
   ScrollView,
+  Modal,
   TouchableOpacity,
   ActivityIndicator,
   BackHandler,
@@ -30,6 +32,7 @@ import {
   collection,
   getDocs,
   getFirestore,
+  updateDoc
 } from "firebase/firestore";
 import {
   getDownloadURL,
@@ -53,11 +56,21 @@ const AddProductScreen = ({ navigation, route }) => {
   const [categories, setCategory] = useState([]);
   const { idSubcategory, nameSubcategory } = route.params || {};
   const [loading, setLoading] = useState(false);
+  const [isModalVisible, setModalVisible] = useState(false);
+  const toggleModal = () => {
+    setModalVisible(!isModalVisible);
+  };
+  const [loaiHang, setLoaiHang] = useState("");
+  const [soLuong, setSoLuong] = useState("");
+  const [giaLoaiHang, setGiaLoaiHang] = useState("");
+  const [itemLoaiHang, setItemLoaiHang] = useState([]);
+  const [editItemId, setEditItemId] = useState(null);
 
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged((authenticatedUser) => {
       setUser(authenticatedUser.uid);
     });
+
     getCategorytList();
     // Hủy người nghe khi component unmount
     return () => unsubscribe();
@@ -93,39 +106,72 @@ const AddProductScreen = ({ navigation, route }) => {
     return true; // Nếu tất cả các thẻ input đã được nhập, trả về true
   };
 
-  const addProduct = async (downloadURLs) => {
-    const productRef = await addDoc(collection(db, "product"), {
-      name: name,
-      price: price,
-      description: descript,
-      idShop: userId,
-      quantity: quantity,
-      sold: 0,
-      idSubCategory: idSubcategory,
-      discount: "",
-    });
-    console.log("Document written with ID: ", productRef.id);
-    const productId = productRef.id;
+  const addProduct = async () => {
+    const inputValues = [name, descript, idSubcategory];
+    if (areInputsFilled(inputValues)) {
+      if (itemLoaiHang.length == 0 && !areInputsFilled([price, quantity])) {
+        Alert.alert("Thông báo", "Nhập thiếu thông tin");
+      } else {
+        const downloadURLs = await uploadImage(images);
+        const productRef = await addDoc(collection(db, "product"), {
+          name: name,
+          description: descript,
+          idShop: userId,
+          sold: 0,
+          idSubCategory: idSubcategory,
+          discount: "",
+        });
+        console.log("Document written with ID: ", productRef.id);
+        const productId = productRef.id;
 
-    const imageCollectionRef = collection(db, "product", productId, "image");
+        const imageCollectionRef = collection(
+          db,
+          "product",
+          productId,
+          "image"
+        );
 
-    // Thêm mỗi URL hình ảnh vào subcollection "images"
-    downloadURLs.forEach(async (url) => {
-      await addDoc(collection(db, "product", productId, "image"), {
-        url: url,
-        // order: index + 1, // Để duy trì thứ tự của các hình ảnh
-      });
-    });
+        // Thêm mỗi URL hình ảnh vào subcollection "images"
+        downloadURLs.forEach(async (url) => {
+          await addDoc(collection(db, "product", productId, "image"), {
+            url: url,
+            // order: index + 1, // Để duy trì thứ tự của các hình ảnh
+          });
+        });
+        if (itemLoaiHang.length > 0) {
+          const docRef = doc(db, "product", productId);
+          await updateDoc(docRef, {
+            price: minPrice,
+            quantity: totalQuantity,
+          });
+          addOption(productId);
+        } else {
+          const docRef = doc(db, "product", productId);
+          await updateDoc(docRef, {
+            price: price,
+            quantity: quantity,
+          });
+          await addDoc(collection(db, "product", productId, "option"), {
+            name:"     ",
+            image:downloadURLs[0],
+            price: price,
+            quantity: quantity,
+          });
+        }
 
-    setLoading(false);
-    Alert.alert("Thông báo", "Sản phẩm đã được thêm thành công", [
-      {
-        text: "OK",
-        onPress: () => {
-          navigation.navigate("MyShop");
-        },
-      },
-    ]);
+        setLoading(false);
+        Alert.alert("Thông báo", "Sản phẩm đã được thêm thành công", [
+          {
+            text: "OK",
+            onPress: () => {
+              navigation.navigate("MyShop");
+            },
+          },
+        ]);
+      }
+    } else {
+      Alert.alert("Cảnh báo", "Nhập thiếu thông tin sản phẩm");
+    }
   };
 
   const pickImages = async () => {
@@ -153,73 +199,86 @@ const AddProductScreen = ({ navigation, route }) => {
     }
   };
 
-  const uploadImage = async () => {
-    const inputValues = [name, price, descript, quantity];
-    if (areInputsFilled(inputValues)) {
-      if (images.length > 0) {
-        const storageRef = ref(storage, "productImg");
-        const getCurrentTimestamp = () => {
-          const date = new Date();
-          return `${date.getFullYear()}${(date.getMonth() + 1)
-            .toString()
-            .padStart(2, "0")}${date
-            .getDate()
-            .toString()
-            .padStart(2, "0")}_${date
-            .getHours()
-            .toString()
-            .padStart(2, "0")}${date
-            .getMinutes()
-            .toString()
-            .padStart(2, "0")}${date.getSeconds().toString().padStart(2, "0")}`;
-        };
-        setLoading(true);
-        const uploadTasks = images.map(async (uri, index) => {
-          const response = await fetch(uri);
-          const blob = await response.blob();
+  const uploadImage = async (listImage) => {
+    if (listImage.length > 0) {
+      const storageRef = ref(storage, "productImg");
+      const getCurrentTimestamp = () => {
+        const date = new Date();
+        return `${date.getFullYear()}${(date.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}${date.getDate().toString().padStart(2, "0")}_${date
+          .getHours()
+          .toString()
+          .padStart(2, "0")}${date
+          .getMinutes()
+          .toString()
+          .padStart(2, "0")}${date.getSeconds().toString().padStart(2, "0")}`;
+      };
+      setLoading(true);
 
-          // Construct a unique filename based on the index (you might want to use a more meaningful name)
-          const filename =
-            userId + `_${index + 1}_${getCurrentTimestamp()}.jpg`;
+      const uploadTasks = listImage.map(async (uri, index) => {
+        const response = await fetch(uri);
+        const blob = await response.blob();
 
-          // Create a reference to the new file in Firebase Storage
-          const imageRef = ref(storageRef, filename);
+        // Tạo tên file
+        const filename = userId + `_${index + 1}_${getCurrentTimestamp()}.jpg`;
 
-          const snapshot = await uploadBytesResumable(imageRef, blob);
-          return snapshot.ref;
+        const imageRef = ref(storageRef, filename);
+
+        const snapshot = await uploadBytesResumable(imageRef, blob);
+        return snapshot.ref;
+      });
+
+      try {
+        // Upload
+        const uploadSnapshots = await Promise.all(uploadTasks);
+
+        // Lấy url của ảnh
+        const downloadURLs = await Promise.all(
+          uploadSnapshots.map((snapshot) => getDownloadURL(snapshot))
+        );
+        // Lưu url ảnh vào mảng
+        const list = [];
+        downloadURLs.forEach((url, index) => {
+          setUrlImage((prevUrlImage) => [...prevUrlImage, url]);
+
+          // console.log(`Download URL ${index + 1}: ${url}`);
         });
-
-        try {
-          // Wait for all upload tasks to complete
-          const uploadSnapshots = await Promise.all(uploadTasks);
-
-          // Get download URLs for each uploaded image
-          const downloadURLs = await Promise.all(
-            uploadSnapshots.map((snapshot) => getDownloadURL(snapshot))
-          );
-          // Log the download URLs
-          const list = [];
-          downloadURLs.forEach((url, index) => {
-            setUrlImage((prevUrlImage) => [...prevUrlImage, url]);
-
-            // console.log(`Download URL ${index + 1}: ${url}`);
-          });
-          // console.log(`Download URL: `,urlImage);
-          console.log("Tất cả ảnh đã được upload.");
-
-          addProduct(downloadURLs);
-          setSelectedImages([]);
-          setImages([]);
-        } catch (error) {
-          setLoading(false);
-          console.error("Error uploading images:", error.message);
-        }
-      } else {
-        Alert.alert("Cảnh báo", "Chưa thêm ảnh sản phẩm");
+        // console.log(`Download URL: `,urlImage);
+        console.log("Ảnh đã được upload.");
+        setSelectedImages([]);
+        setImages([]);
+        return downloadURLs;
+      } catch (error) {
+        setLoading(false);
+        console.error("Error uploading images:", error.message);
       }
     } else {
-      Alert.alert("Cảnh báo", "Nhập thiếu thông tin sản phẩm");
+      Alert.alert("Cảnh báo", "Chưa thêm ảnh sản phẩm");
     }
+  };
+
+  const addOption = async (prdID) => {
+    try {
+      itemLoaiHang.forEach(async (item) => {
+        const loaiHangUrl = await uploadImage(item.loaiHangImg);
+        loaiHangUrl.forEach(async (url) => {
+          await addDoc(collection(db, "product", prdID, "option"), {
+            name: item.loaiHang,
+            price: item.giaLoaiHang,
+            quantity: item.soLuong,
+            image: url,
+          });
+        });
+      });
+      setItemLoaiHang([]);
+    } catch (e) {
+      console.log("Them option product loi", e);
+    }
+  };
+
+  const showitems = () => {
+    console.log(itemLoaiHang);
   };
   const handleImagePress = (index) => {
     // Khi người dùng nhấn vào ảnh, xóa ảnh khỏi danh sách đã chọn
@@ -240,6 +299,111 @@ const AddProductScreen = ({ navigation, route }) => {
     setSelectedImages([]);
   };
 
+  // Add thông tin phân loại hàng vào mảng
+  const [loaiHangImg, setLoaiHangImg] = useState("");
+
+  const pickLoaiHangImg = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      aspect: [4, 3],
+      base64: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const newImages = result.assets.map((asset) => asset.uri);
+      setLoaiHangImg(newImages);
+    }
+  };
+  useEffect(() => {
+    // Log giá trị mới của loaiHangImg sau mỗi lần cập nhật
+    console.log("loaiHangImg updated:", loaiHangImg);
+  }, [loaiHangImg]);
+  const getMaxGiaLoaiHang = (array) => {
+    if (array.length === 0) {
+      return null;
+    }
+    return Math.max(...array.map((item) => parseFloat(item.giaLoaiHang)));
+  };
+
+  // Hàm kiểm tra giá trị tối thiểu
+  const getMinGiaLoaiHang = (array) => {
+    if (array.length === 0) {
+      return null;
+    }
+    return Math.min(...array.map((item) => parseFloat(item.giaLoaiHang)));
+  };
+
+  const getTotalQty = (array) => {
+    const totalQuantity = array.reduce((acc, item) => {
+      return acc + parseInt(item.soLuong, 10);
+    }, 0);
+
+    return totalQuantity;
+  };
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+
+  const [totalQuantity, setTotalQuantity] = useState("");
+  useEffect(() => {
+    // Log giá trị mới của loaiHangImg sau mỗi lần cập nhật
+    if (itemLoaiHang.length > 0) {
+      if (itemLoaiHang.length < 2) {
+        setMinPrice(getMinGiaLoaiHang(itemLoaiHang));
+      } else {
+        setMinPrice(getMinGiaLoaiHang(itemLoaiHang));
+        setMaxPrice(getMaxGiaLoaiHang(itemLoaiHang));
+      }
+      setTotalQuantity(getTotalQty(itemLoaiHang));
+    } else {
+      setPrice("");
+    }
+    console.log("item length", itemLoaiHang.length, "qty", totalQuantity);
+  }, [itemLoaiHang, minPrice, maxPrice, totalQuantity]);
+  const addLoaiHang = () => {
+    // Kiểm tra xem cả hai thẻ input đã được nhập chưa
+    if (loaiHangImg !== "" && loaiHang && soLuong > 0 && giaLoaiHang > 0) {
+      const newItem = { loaiHangImg, loaiHang, soLuong, giaLoaiHang };
+
+      if (editIndex !== null) {
+        // Nếu đang chỉnh sửa, cập nhật item tại editIndex
+        const updatedItems = [...itemLoaiHang];
+        updatedItems[editIndex] = newItem;
+        setItemLoaiHang(updatedItems);
+        setEditIndex(null);
+      } else {
+        // Nếu không, thêm một item mới
+        setItemLoaiHang([...itemLoaiHang, newItem]);
+      }
+
+      // Đặt giá trị TextInput về rỗng
+      setLoaiHang("");
+      setSoLuong("");
+      setGiaLoaiHang("");
+      setLoaiHangImg("");
+      // Đóng cửa sổ pop-up
+      toggleModal();
+    } else {
+      alert("Vui lòng nhập đầy đủ thông tin");
+    }
+  };
+  const [editIndex, setEditIndex] = useState(null);
+  const editLoaiHang = (index) => {
+    const selectedItem = itemLoaiHang[index];
+    setLoaiHangImg(selectedItem.loaiHangImg);
+    setLoaiHang(selectedItem.loaiHang);
+    setSoLuong(selectedItem.soLuong);
+    setGiaLoaiHang(selectedItem.giaLoaiHang);
+    setEditIndex(index);
+    // Mở cửa sổ pop-up để chỉnh sửa giá trị
+    toggleModal();
+  };
+
+  const deleteLoaiHang = (index) => {
+    // Xóa item tại vị trí index
+    setItemLoaiHang(itemLoaiHang.filter((item, i) => i !== index));
+  };
+
   const handleQuantityChange = (text) => {
     // Loại bỏ các ký tự không phải số
     const numericValue = text.replace(/[^0-9]/g, "");
@@ -248,6 +412,13 @@ const AddProductScreen = ({ navigation, route }) => {
     } else {
       Alert.alert("Thông báo", "Số lượng sản phẩm không vượt quá 10.000");
     }
+  };
+  const closeModal = () => {
+    setLoaiHangImg("");
+    setLoaiHang("");
+    setSoLuong("");
+    setGiaLoaiHang("");
+    toggleModal();
   };
 
   return (
@@ -366,7 +537,7 @@ const AddProductScreen = ({ navigation, route }) => {
           }}
         >
           <Ionicons name="list" size={25} marginLeft={10} color="gray" />
-          <Text style={{ marginLeft: 10 }}> Danh mục </Text>
+          <Text style={{ marginLeft: 10 }}> Ngành hàng </Text>
         </View>
         <View
           style={{
@@ -385,8 +556,224 @@ const AddProductScreen = ({ navigation, route }) => {
         </View>
       </TouchableOpacity>
 
+      {/* Phân loại hàng */}
+      <Modal
+        visible={isModalVisible}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={toggleModal}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "white",
+              padding: 20,
+              borderRadius: 10,
+              width: 300,
+            }}
+          >
+            <TouchableOpacity
+              style={{
+                marginTop: -15,
+                marginRight: -15,
+                alignSelf: "flex-end",
+              }}
+              onPress={closeModal}
+            >
+              <Ionicons name="close-circle" size={25} color="lightgray" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                borderWidth: 1,
+                borderColor: color.origin,
+                alignSelf: "center",
+                width: "30%",
+              }}
+              onPress={pickLoaiHangImg}
+            >
+              <Text
+                style={{
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  color: color.origin,
+                }}
+              >
+                Chọn ảnh
+              </Text>
+            </TouchableOpacity>
+            {loaiHangImg === "" ? (
+              <></>
+            ) : (
+              <>
+                {loaiHangImg.map((image, index) => (
+                  <Image
+                    key={index}
+                    style={{
+                      width: 100,
+                      height: 100,
+                      alignSelf: "center",
+                      marginVertical: 5,
+                    }}
+                    source={{ uri: image }}
+                  />
+                ))}
+              </>
+            )}
+            <Text style={{ fontWeight: "bold", color: color.origin }}>
+              Loại hàng:
+            </Text>
+            <TextInput
+              style={styles.input_phanloaihang}
+              placeholder="Nhập loại hàng"
+              value={loaiHang}
+              onChangeText={(text) => setLoaiHang(text)}
+            />
+            <Text style={{ fontWeight: "bold", color: color.origin }}>
+              Số lượng:
+            </Text>
+            <TextInput
+              style={styles.input_phanloaihang}
+              keyboardType="numeric"
+              placeholder="Nhập số lượng"
+              value={soLuong}
+              onChangeText={(text) => setSoLuong(text)}
+            />
+            <Text style={{ fontWeight: "bold", color: color.origin }}>
+              Giá:
+            </Text>
+            <TextInput
+              style={styles.input_phanloaihang}
+              keyboardType="numeric"
+              placeholder="Nhập giá"
+              value={giaLoaiHang}
+              onChangeText={(text) => setGiaLoaiHang(text)}
+            />
+            <TouchableOpacity
+              style={{ backgroundColor: color.origin, marginHorizontal: 100 }}
+              onPress={addLoaiHang}
+            >
+              <View
+                style={{
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: 35,
+                }}
+              >
+                <Text style={{ color: "white", fontWeight: "bold" }}>Lưu</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      {/* <Button title="items" onPress={showitems} /> */}
+      <View
+        style={{ backgroundColor: "white", marginBottom: 5, paddingBottom: 5 }}
+      >
+        <View
+          style={[
+            styles.list_items,
+            { marginBottom: 0, paddingRight: 20, alignItems: "center" },
+          ]}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Ionicons
+              name="duplicate-outline"
+              size={25}
+              marginLeft={10}
+              color="gray"
+            />
+            <Text style={{ marginLeft: 10 }}>Thêm phân loại hàng</Text>
+          </View>
+
+          <TouchableOpacity
+            style={{ alignContent: "flex-end" }}
+            onPress={toggleModal}
+          >
+            <Ionicons
+              style={{ alignSelf: "center" }}
+              name="add-circle-outline"
+              size={25}
+              color={color.origin}
+            />
+          </TouchableOpacity>
+        </View>
+        <View
+          style={{
+            height: 1,
+            width: "90%",
+            alignSelf: "center",
+            backgroundColor: "lightgray",
+          }}
+        ></View>
+        {itemLoaiHang.map((item, index) => (
+          <View
+            key={index}
+            style={[
+              styles.itemContainer,
+              { flexDirection: "row", marginVertical: 5, marginHorizontal: 5 },
+            ]}
+          >
+            {/* Cột bên trái */}
+            {item.loaiHangImg.map((image, index) => (
+              <Image
+                key={index}
+                source={{ uri: image }}
+                style={{ height: 50, width: 50 }}
+              />
+            ))}
+
+            {/* Cột giữa */}
+            <View
+              style={{ flex: 1, paddingHorizontal: 10, alignSelf: "center" }}
+            >
+              <Text>Loại hàng: {item.loaiHang}</Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Text>Số lượng: {item.soLuong}</Text>
+                <Text style={{ alignSelf: "flex-end", color: "red" }}>
+                  Giá: {item.giaLoaiHang}đ
+                </Text>
+              </View>
+            </View>
+
+            {/* Cột bên phải */}
+            <View
+              style={{ alignSelf: "center", justifyContent: "space-between" }}
+            >
+              <TouchableOpacity
+                onPress={() => editLoaiHang(index)}
+                style={{ marginBottom: 5 }}
+              >
+                <Feather name="edit" size={20} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => deleteLoaiHang(index)}>
+                <Feather name="trash-2" size={20} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))}
+      </View>
       {/* Gia */}
-      <View style={styles.list_items}>
+      <View
+        style={[
+          styles.list_items,
+          {
+            alignItems: "center",
+            backgroundColor: itemLoaiHang.length > 0 ? "lightgray" : "white",
+          },
+        ]}
+      >
         <View
           style={{
             alignItems: "flex-start",
@@ -402,16 +789,41 @@ const AddProductScreen = ({ navigation, route }) => {
           />
           <Text style={{ marginLeft: 10 }}> Giá </Text>
         </View>
-        <TextInput
-          style={{ marginRight: 5, textAlign: "right" }}
-          placeholder="Thiết lập giá"
-          keyboardType="numeric"
-          value={price}
-          onChangeText={setPrice}
-        />
+        {itemLoaiHang.length > 1 ? (
+          <>
+            <Text
+              style={{ marginRight: 5, textAlign: "right" }}
+            >{`${minPrice}đ-${maxPrice}đ`}</Text>
+          </>
+        ) : itemLoaiHang.length == 1 ? (
+          <>
+            <Text
+              style={{ marginRight: 5, textAlign: "right" }}
+            >{`${minPrice}đ`}</Text>
+          </>
+        ) : (
+          <>
+            <TextInput
+              style={{ marginRight: 5, textAlign: "right" }}
+              placeholder="Thiết lập giá"
+              keyboardType="numeric"
+              value={price}
+              onChangeText={setPrice}
+              editable={itemLoaiHang.length > 0 ? false : true}
+            />
+          </>
+        )}
       </View>
       {/* So luong kho */}
-      <View style={styles.list_items}>
+      <View
+        style={[
+          styles.list_items,
+          {
+            alignItems: "center",
+            backgroundColor: itemLoaiHang.length > 0 ? "lightgray" : "white",
+          },
+        ]}
+      >
         <View
           style={{
             alignItems: "flex-start",
@@ -422,18 +834,29 @@ const AddProductScreen = ({ navigation, route }) => {
           <Octicons name="stack" size={25} marginLeft={10} color="gray" />
           <Text style={{ marginLeft: 10 }}> Kho hàng </Text>
         </View>
-        <TextInput
-          style={{ marginRight: 5, textAlign: "right" }}
-          placeholder="Nhập số lượng sản phẩm"
-          keyboardType="numeric"
-          value={quantity}
-          onChangeText={handleQuantityChange}
-        />
+        {itemLoaiHang.length > 0 ? (
+          <>
+            <Text
+              style={{ marginRight: 5, textAlign: "right" }}
+            >{`${totalQuantity}`}</Text>
+          </>
+        ) : (
+          <>
+            <TextInput
+              style={{ marginRight: 5, textAlign: "right" }}
+              placeholder="Nhập số lượng sản phẩm"
+              keyboardType="numeric"
+              value={quantity}
+              onChangeText={handleQuantityChange}
+              editable={itemLoaiHang.length > 0 ? false : true}
+            />
+          </>
+        )}
       </View>
       {/* Button Thêm */}
       <TouchableOpacity
         style={{ backgroundColor: color.origin, marginHorizontal: 100 }}
-        onPress={uploadImage}
+        onPress={addProduct}
       >
         <View
           style={{ alignItems: "center", justifyContent: "center", height: 35 }}
@@ -476,5 +899,10 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.7)",
     justifyContent: "center",
     alignItems: "center",
+  },
+  input_phanloaihang: {
+    marginVertical: 2,
+    paddingVertical: 0,
+    paddingHorizontal: 5,
   },
 });

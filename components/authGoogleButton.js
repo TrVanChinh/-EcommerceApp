@@ -74,16 +74,19 @@ const authGoogleButton = ({ onLoginSuccess }) => {
       // Get the current user after successful sign-in
       const currentUser = userCredential.user;
       console.log(currentUser.uid);
+      const existingUserDoc = await db.collection("user").doc(currentUser.uid).get();
+      const isNewUser = !existingUserDoc.exists;
+      if (isNewUser) {
       const userDocRef = db.collection("user").doc(currentUser.uid);
-      
       // Lưu thông tin người dùng vào Firestore
       await userDocRef.set({
         name: currentUser.displayName,
         email: currentUser.email,
         photo: currentUser.photoURL || null,
       });
-  
+      }
       onLoginSuccess(userCredential);
+
     } catch (error) {
       console.log(error);
     }

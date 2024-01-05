@@ -1,8 +1,14 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
-import { SimpleLineIcons, AntDesign, Octicons,MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  SimpleLineIcons,
+  AntDesign,
+  Octicons,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import color from "../../components/color";
-const MyShopScreen = ({ navigation }) => {
+const MyShopScreen = ({ navigation,route }) => {
+  const { idUser: idUser } = route.params;
   return (
     <View>
       <View style={styles.todo_list}>
@@ -76,7 +82,7 @@ const MyShopScreen = ({ navigation }) => {
             marginLeft={10}
             color={color.origin}
           />
-          <Text style={{ marginLeft: 10 }}> Danh sách sản phẩm</Text>
+          <Text style={{ marginLeft: 10 }}> Sản phẩm của tôi</Text>
         </View>
         <View
           style={{
@@ -126,7 +132,14 @@ const MyShopScreen = ({ navigation }) => {
         </View>
       </TouchableOpacity>
       {/* Thông tin cửa hàng */}
-      <TouchableOpacity style={styles.list_items}>
+      <TouchableOpacity
+        style={styles.list_items}
+        onPress={() =>
+          navigation.navigate("ShopInfo", {
+            idUser: idUser,
+          })
+        }
+      >
         <View
           style={{
             alignItems: "flex-start",
@@ -140,7 +153,7 @@ const MyShopScreen = ({ navigation }) => {
             marginLeft={10}
             color={color.origin}
           />
-          <Text style={{ marginLeft: 10 }}>X Thông tin cửa hàng </Text>
+          <Text style={{ marginLeft: 10 }}>Thông tin cửa hàng </Text>
         </View>
         <View
           style={{
@@ -173,7 +186,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   todo_list: {
-    marginVertical:10,
+    marginVertical: 10,
     flexDirection: "row",
     alignItems: "top",
     justifyContent: "space-between",
@@ -183,18 +196,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 5,
     width: "20%",
-    backgroundColor:"white",
-    borderRadius:10,
-    padding:10,
-    borderWidth:1,
-    borderColor:"#e6e3e3"
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#e6e3e3",
   },
   todoItemText: {
     textAlign: "center",
   },
-  numberTodoItem:{
-    fontSize:30,
-    color:color.origin,
-    fontWeight:'bold'
-  }
+  numberTodoItem: {
+    fontSize: 30,
+    color: color.origin,
+    fontWeight: "bold",
+  },
 });

@@ -25,6 +25,8 @@ import SubcategoryScreen from "../screens/Seller/Categories/SubcategoryScreen";
 import EditUserInfoScreen from "../screens/EditUserInfoScreen";
 
 import {Entypo, AntDesign, Octicons , MaterialCommunityIcons, Ionicons, FontAwesome5  } from '@expo/vector-icons';
+import EditProductScreen from "../screens/Seller/EditProductScreen";
+import ShopInfoScreen from "../screens/Seller/ShopInfoScreen";
 const StackNavigator = () => {
   const Stack = createNativeStackNavigator();
   const Tab = createBottomTabNavigator();
@@ -224,6 +226,16 @@ const StackNavigator = () => {
             headerTitle: "Thông tin tài khoản",          
             headerTitleAlign: "center", 
           }} 
+        />
+        <Stack.Screen name="EditProduct" component={EditProductScreen} option={{
+            headerTitle: "Cập nhật sản phẩm",          
+            headerTitleAlign: "center", 
+        }}
+        />
+        <Stack.Screen name="ShopInfo" component={ShopInfoScreen} options={{
+          headerTitle: "Thông tin cửa hàng",          
+          headerTitleAlign: "center"
+        }}
         />
       </Stack.Navigator>
     </NavigationContainer>
