@@ -30,8 +30,10 @@ import {
 } from "firebase/firestore";
 import { useFocusEffect } from "@react-navigation/native";
 import { app } from "../firebase";
+import { useUser } from '../UserContext';
 
 const ProfileScreen = ({ navigation }) => {
+  const { updateUser } = useUser();
   const [isLogin, setLogin] = useState(null);
   const [user, setUser] = useState(null);
   const db = getFirestore(app);
@@ -76,6 +78,7 @@ const ProfileScreen = ({ navigation }) => {
   };
 
   const handleLogout = () => {
+    updateUser(null)
     auth()
       .signOut()
       .then(() => console.log("Đã đăng xuất!"))
