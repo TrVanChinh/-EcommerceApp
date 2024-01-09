@@ -219,65 +219,74 @@ import {
         </View>
         <ScrollView> 
           <View style={{ marginHorizontal: 10 }}>
-          {order?.map((option, index) =>
-              <View
-                key={index}
-                style={{
-                  backgroundColor: "white",
-                  marginBottom: 10,
-                  borderBottomColor: "#F0F0F0",
-                  borderWidth: 2,
-                  borderLeftWidth: 0,
-                  borderTopWidth: 0,
-                  borderRightWidth: 0,
-                }}
-              >
-              {option?.dataInfoOrder.option.map((item, index) => 
-              <View key={index}>
-                <Pressable
+            {order ? (
+              <>
+              {order?.map((option, index) =>
+                <View
+                  key={index}
                   style={{
-                    flexDirection: "row",
+                    backgroundColor: "white",
+                    marginBottom: 10,
+                    borderBottomColor: "#F0F0F0",
+                    borderWidth: 2,
+                    borderLeftWidth: 0,
+                    borderTopWidth: 0,
+                    borderRightWidth: 0,
                   }}
-                  // onPress={() =>  navigation.navigate('Detail', {product: item.product})}
                 >
-                  <View style={{
-                    paddingRight: 10,
-                  }}>
-                    <Image
-                      style={{ width: 100, height: 120, resizeMode: "contain",  }}
-                      source={{uri: item?.data.data.option.data.image}}
-                    />
-                  </View>
-    
-                  <View>
-                    <Text numberOfLines={3} style={{ width: 200, fontSize:16, marginTop: 10 }}>
-                    {item?.data.data.name}
-                    </Text>
-                    <Text numberOfLines={3} style={{ width: 200, fontSize:16, marginTop: 10 }}>
-                      {item?.data.data.option.data.name}
-                    </Text>
-                    <Text
-                      style={{fontSize: 15, fontWeight: "bold", marginTop: 6 }}
-                    >
-                      Giá: {item?.data.data.option.price}đ 
-                    </Text>
-                    <Text
-                      style={{fontSize: 15, fontWeight: "bold", marginTop: 6 }}
-                    >
-                      Số lượng: {item?.data.data.option.quantity}
-                    </Text>
-                  
-                  </View>
-                </Pressable>
+                {option?.dataInfoOrder.option.map((item, index) => 
+                <View key={index}>
+                  <Pressable
+                    style={{
+                      flexDirection: "row",
+                    }}
+                    // onPress={() =>  navigation.navigate('Detail', {product: item.product})}
+                  >
+                    <View style={{
+                      paddingRight: 10,
+                    }}>
+                      <Image
+                        style={{ width: 100, height: 120, resizeMode: "contain",  }}
+                        source={{uri: item?.data.data.option.data.image}}
+                      />
+                    </View>
+      
+                    <View>
+                      <Text numberOfLines={3} style={{ width: 200, fontSize:16, marginTop: 10 }}>
+                      {item?.data.data.name}
+                      </Text>
+                      <Text numberOfLines={3} style={{ width: 200, fontSize:16, marginTop: 10 }}>
+                        {item?.data.data.option.data.name}
+                      </Text>
+                      <Text
+                        style={{fontSize: 15, fontWeight: "bold", marginTop: 6 }}
+                      >
+                        Giá: {item?.data.data.option.price}đ 
+                      </Text>
+                      <Text
+                        style={{fontSize: 15, fontWeight: "bold", marginTop: 6 }}
+                      >
+                        Số lượng: {item?.data.data.option.quantity}
+                      </Text>
+                    
+                    </View>
+                  </Pressable>
+                </View>
+                )} 
+                <Text
+                  style={{ color:'red',fontSize: 15, alignSelf:"center",fontWeight: "bold", padding: 6 }}
+                >
+                  Tổng đơn hàng: {option.dataInfoOrder.orderData.totalByShop}đ 
+                </Text>
               </View>
-              )} 
-              <Text
-                style={{ color:'red',fontSize: 15, alignSelf:"center",fontWeight: "bold", padding: 6 }}
-              >
-                Tổng đơn hàng: {option.dataInfoOrder.orderData.totalByShop}đ 
-              </Text>
-            </View>
-          )}
+            )}
+            </>
+            ) : (
+              <View>
+                <Text>Bạn chưa có đơn hàng nào</Text>
+              </View>
+            )}
+          
           </View>
         </ScrollView>
       </View>
