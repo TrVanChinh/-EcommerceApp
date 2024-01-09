@@ -30,6 +30,8 @@ import ListProducts from "../screens/Seller/ListProducts";
 import CategoryScreen from "../screens/Seller/Categories/CategoryScreen";
 import SubcategoryScreen from "../screens/Seller/Categories/SubcategoryScreen";
 import EditUserInfoScreen from "../screens/EditUserInfoScreen";
+import PurchaseOrderScreen from "../screens/PurchaseOrderScreen";
+import ShippingUnitScreen from "../screens/ShippingUnitScreen";
 import {Entypo, AntDesign, Octicons , MaterialCommunityIcons, Ionicons, FontAwesome5  } from '@expo/vector-icons';
 import EditProductScreen from "../screens/Seller/EditProductScreen";
 import ShopInfoScreen from "../screens/Seller/ShopInfoScreen";
@@ -220,6 +222,8 @@ const StackNavigator = () => {
         <Stack.Screen name="UpdateAddress" component={UpdateAddressScreen} options={{headerTitle: 'Cập nhật địa chỉ'}}/>
         <Stack.Screen name="ResetAddress" component={ResetAddressScreen} options={{headerTitle: 'Đặt lại địa chỉ'}}/>
         <Stack.Screen name="Shop" component={ShopScreen} options={{headerTitle: 'Xem Shop'}}/>
+        <Stack.Screen name="PurchaseOrder" component={PurchaseOrderScreen} options={{headerTitle: 'Đơn mua'}}/>
+        <Stack.Screen name="ShippingUnit" component={ShippingUnitScreen} options={{headerTitle: 'Đơn vị vận chuyển'}}/>
         <Stack.Screen name="Register Seller" component={RegisterSellerScreen}
           options={{
             headerTitle: "Đăng kí bán hàng",           

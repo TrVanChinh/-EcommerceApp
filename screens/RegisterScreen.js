@@ -20,7 +20,7 @@ import AuthGoogleButton from '../components/authGoogleButton'
 import { useUser } from '../UserContext';
 
 const RegisterScreen = ({navigation}) => {
-  const { updateUser } = useUser();
+  const { updateUser} = useUser();
   const [phoneNumber, setPhoneNumber] = useState('')
   // const [code, setCode] = useState('')
   const [verificationId, setVerificationId] = useState('')

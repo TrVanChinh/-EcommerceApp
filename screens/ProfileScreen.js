@@ -7,6 +7,7 @@ import {
   View,
   Image,
   Alert,
+  Pressable,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -16,6 +17,9 @@ import {
   Entypo,
   AntDesign,
   Ionicons,
+  FontAwesome5,
+  MaterialCommunityIcons,
+  MaterialIcons,
 } from "@expo/vector-icons";
 import color from "../components/color";
 import auth from "@react-native-firebase/auth";
@@ -231,12 +235,150 @@ const ProfileScreen = ({ navigation }) => {
           </View>
         </View>
         <View style={styles.lowerView}>
-          {dataUser && dataUser.seller ? (
-            <>
+        {!dataUser?
+          <>
+          {/* Dang ki ban hang */}
+          <TouchableOpacity
+                style={styles.list_items}
+                onPress={() =>                    
+          Alert.alert("Thông báo", "Vui lòng đăng nhập trước", [
+            {
+              text: "OK",
+              onPress: () => {
+                navigation.navigate("Login");
+              },
+            },
+          ])                  
+                }
+              >
+                <View
+                  style={{
+                    alignItems: "flex-start",
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <Entypo
+                    name="shop"
+                    size={25}
+                    marginLeft={10}
+                    color={color.origin}
+                  />
+                  <Text style={{ marginLeft: 10 }}> Bắt đầu bán</Text>
+                </View>
+                <View
+                  style={{
+                    alignItems: "flex-end",
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text> Đăng kí ngay</Text>
+                  <SimpleLineIcons
+                    marginLeft={15}
+                    name="arrow-right"
+                    size={10}
+                    color="#60698a"
+                  />
+                </View>
+              </TouchableOpacity>
+              </>
+          :dataUser.status==null?
+          //Chuyen sang man hinh dang ky seller
+          <>
+          
+              {/* Dang ki ban hang */}
+              <TouchableOpacity
+                style={styles.list_items}
+                onPress={() =>
+                    navigation.navigate("Register Seller", {
+                        idUser: idUser,
+                      })                    
+                }
+              >
+                <View
+                  style={{
+                    alignItems: "flex-start",
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <Entypo
+                    name="shop"
+                    size={25}
+                    marginLeft={10}
+                    color={color.origin}
+                  />
+                  <Text style={{ marginLeft: 10 }}> Bắt đầu bán</Text>
+                </View>
+                <View
+                  style={{
+                    alignItems: "flex-end",
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text> Đăng kí ngay</Text>
+                  <SimpleLineIcons
+                    marginLeft={15}
+                    name="arrow-right"
+                    size={10}
+                    color="#60698a"
+                  />
+                </View>
+              </TouchableOpacity>
+          </>
+          :
+            dataUser.status===false?
+            //Thông báo chưa duyệt
+            <>            
+            <TouchableOpacity
+                style={styles.list_items}
+                onPress={() =>
+                    Alert.alert("Đã đăng ký","Yêu cầu đang được phê duyệt")                 
+                }
+              >
+                <View
+                  style={{
+                    alignItems: "flex-start",
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <Entypo
+                    name="shop"
+                    size={25}
+                    marginLeft={10}
+                    color={color.origin}
+                  />
+                  <Text style={{ marginLeft: 10 }}> Đã đăng ký bán hàng</Text>
+                </View>
+                <View
+                  style={{
+                    alignItems: "flex-end",
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text> Đang duyệt</Text>
+                  <SimpleLineIcons
+                    marginLeft={15}
+                    name="arrow-right"
+                    size={10}
+                    color="#60698a"
+                  />
+                </View>
+              </TouchableOpacity>
+            </>
+            :
+              dataUser.seller?
+              //Chuyển sang MyShopScreen
+              <>
+              
               {/* My shop */}
               <TouchableOpacity
                 style={styles.list_items}
-                onPress={() => navigation.navigate("MyShop",{idUser: idUser})}
+                onPress={() => navigation.navigate("MyShop", {idUser: isLogin.uid})}
               >
                 <View
                   style={{
@@ -269,26 +411,28 @@ const ProfileScreen = ({ navigation }) => {
                   />
                 </View>
               </TouchableOpacity>
-            </>
-          ) : (
-            <>
-              {/* Dang ki ban hang */}
+              </>
+              :
+              //Thông báo từ chối và đăng ký lại
+              <>              
               <TouchableOpacity
                 style={styles.list_items}
-                onPress={() =>
-                  dataUser
-                    ? navigation.navigate("Register Seller", {
-                        idUser: idUser,
-                      })
-                    : Alert.alert("Thông báo", "Vui lòng đăng nhập trước", [
-                        {
-                          text: "OK",
-                          onPress: () => {
-                            navigation.navigate("Login");
-                          },
-                        },
-                      ])
-                }
+                onPress={() => 
+                  Alert.alert(
+                    'Quản trị viên đã từ chối yêu cầu',
+                    'Đăng ký lại?',
+                    [
+                      { text: 'No', 
+                      style: 'cancel' },
+                      { text: 'Yes', 
+                      onPress: () => {
+                        navigation.navigate("Register Seller", {
+                          idUser: idUser,
+                        })
+                      } },
+                    ],
+                    { cancelable: false }
+                  )}
               >
                 <View
                   style={{
@@ -312,7 +456,7 @@ const ProfileScreen = ({ navigation }) => {
                     alignItems: "center",
                   }}
                 >
-                  <Text> Đăng kí miễn phí</Text>
+                  <Text> Đăng ký ngay </Text>
                   <SimpleLineIcons
                     marginLeft={15}
                     name="arrow-right"
@@ -321,8 +465,8 @@ const ProfileScreen = ({ navigation }) => {
                   />
                 </View>
               </TouchableOpacity>
-            </>
-          )}
+              </>
+        }
           <TouchableOpacity
             style={styles.list_items}
             onPress={() =>
@@ -371,9 +515,73 @@ const ProfileScreen = ({ navigation }) => {
               />
             </View>
           </TouchableOpacity>
+          
 
+
+
+          {/* Đơn hàng */}
+          <TouchableOpacity
+            style={styles.list_items}
+          >
+            <View
+              style={{
+                alignItems: "flex-start",
+                flexDirection: "row",
+                alignItems: "center",
+                marginLeft: 10
+              }}
+              // onPress={() =>  navigation.navigate("PurchaseOrder")}
+            >
+              <FontAwesome5 name="receipt" size={24} color={color.origin} />
+              
+              <Text style={{ marginLeft: 10 }}>Đơn mua</Text>
+            </View>
+            <View
+              style={{
+                alignItems: "flex-end",
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <Text></Text>
+              <SimpleLineIcons
+                marginLeft={15}
+                name="arrow-right"
+                size={10}
+                color="#60698a"
+              />
+            </View>
+          </TouchableOpacity>
+            <View style={{ flex:1, flexDirection:"row", padding:12, backgroundColor:'white'}}> 
+              <Pressable
+                style={{ flex:1, alignItems:'center'}}
+                onPress={() => dataUser ? navigation.navigate("PurchaseOrder") : navigation.navigate("Login")}
+              >
+                <Ionicons name="wallet-outline" size={24} color={color.origin} />
+                <Text style={styles.text_order}>Chờ xác nhận</Text>
+              </Pressable>
+              <Pressable
+                style={{ flex:1, alignItems:'center'}}
+              >
+                <AntDesign name="inbox" size={24} color={color.origin} />
+                <Text style={styles.text_order}>Chờ lấy hàng</Text>
+              </Pressable>
+              <Pressable
+                style={{ flex:1, alignItems:'center'}}
+              >
+                <MaterialCommunityIcons name="truck-delivery-outline" size={24} color={color.origin} />
+                <Text style={styles.text_order}>Chờ giao hàng</Text>
+              </Pressable>
+              <Pressable
+                style={{ flex:1, alignItems:'center'}}
+              >
+                <MaterialIcons name="star-rate" size={24} color={color.origin} />
+                <Text style={styles.text_order}>Đánh giá</Text>
+              </Pressable>
+            </View>
           <Button title="Logout" onPress={handleLogout} disabled={!dataUser} />
         </View>
+        
       </ScrollView>
       
       
@@ -433,4 +641,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     backgroundColor: "white",
   },
+  text_order : {
+    fontSize:12,
+    color: color.origin
+  }
 });

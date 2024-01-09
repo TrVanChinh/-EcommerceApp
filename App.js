@@ -56,6 +56,8 @@
 
 //npm install react-native-element-dropdown --save
 
+//npm install redux react-redux
+
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import ProfileScreen from './screens/ProfileScreen';

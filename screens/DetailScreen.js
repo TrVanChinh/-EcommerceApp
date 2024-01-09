@@ -45,6 +45,7 @@ const DetailScreen = ({ navigation ,route }) => {
   const [idOption, setIdOption] = useState()
   const [quantity,setQuantity] = useState(1)
   const [modalVisible, setModalVisible] = useState(false);
+  const [buyButtonClicked, setBuyButtonClicked] = useState(false);
   const productId = product.id;
   const ShopId = product.data.idShop;
   const { user } = useUser();
@@ -126,7 +127,6 @@ const DetailScreen = ({ navigation ,route }) => {
         // Kiểm tra xem người dùng đã có giỏ hàng chưa
         const userDocRef = doc(db, 'user', userId);
         const userDocSnapshot = await getDoc(userDocRef);
-    
         if (userDocSnapshot.exists()) {
           // Nếu người dùng đã có giỏ hàng, thêm sản phẩm vào giỏ hàng
           const cartCollectionRef = collection(userDocRef, 'cart');
@@ -385,7 +385,10 @@ const DetailScreen = ({ navigation ,route }) => {
               alignItems: "center",
               justifyContent: "center",
             }}
-            onPress={() => setModalVisible(!modalVisible)}
+            onPress={() => {
+              setModalVisible(!modalVisible)
+              setBuyButtonClicked(false)
+            }}
           >
             <MaterialCommunityIcons name="cart-plus" size={24} color="white" />
             <Text style={{ color: "white", fontSize: 10 }}>
@@ -399,8 +402,12 @@ const DetailScreen = ({ navigation ,route }) => {
               alignItems: "center",
               justifyContent: "center",
             }}
+            onPress={() => {
+              setModalVisible(!modalVisible)
+              setBuyButtonClicked(true)
+            }}
           >
-            <Text style={{ color: "white" }}>Mua với voucher</Text>
+            <Text style={{ color: "white" }}>Mua sản phẩm</Text>
           </TouchableOpacity>
         </View>
 
@@ -419,16 +426,6 @@ const DetailScreen = ({ navigation ,route }) => {
         onTouchOutside={() => setModalVisible(!modalVisible)}
       >
         <ModalContent style={{ width: "100%", height: height/1.6, alignItems:'center' }}>
-          
-              {/* <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  paddingHorizontal: 10,
-                  paddingVertical: 10,
-                  borderRadius: 7,
-                }}
-              > */}
             <View style={{  justifyContent: 'space-between', width: '90%' }}>
             <Text>Lựa chọn:</Text>
               <FlatList
@@ -444,7 +441,7 @@ const DetailScreen = ({ navigation ,route }) => {
                     style={{flexDirection:'row', alignItems:'center', borderWidth: 0.5, borderColor: "#D8D8D8", padding:5,  }}>
                     <Image
                       style={{ width: 50, height: 50}}
-                      source={{uri: item.data.image}}
+                      source={{uri: item?.data.image}}
                     />
                     <Text style={{ fontSize: 14 , color: idOption === item.id ? "white" : "black"}}>{item.data.name}</Text>
                   </Pressable>
@@ -501,7 +498,25 @@ const DetailScreen = ({ navigation ,route }) => {
                 </Pressable>
               </View>
               </View>  
-              <Pressable 
+              {buyButtonClicked ? (
+                <Pressable 
+                style={{
+                  width:"100%",
+                  height: 40,
+                  alignItems:'center',
+                  justifyContent:'center',
+                  backgroundColor: idOption ? "red" : "gray",
+                }} 
+                // onPress={() => {
+                //   if (idOption) {
+                //     user !== null ? addToCart(user.user.uid, productId, idOption , quantity) : navigation.navigate('Login'), setModalVisible(!modalVisible);
+                //   }                
+                // }}
+              >
+                <Text  style={{ color:"white"}}>Mua</Text>
+              </Pressable>
+              ): (
+                <Pressable 
                 style={{
                   width:"100%",
                   height: 40,
@@ -517,6 +532,8 @@ const DetailScreen = ({ navigation ,route }) => {
               >
                 <Text  style={{ color:"white"}}>Thêm vào giỏ hàng</Text>
               </Pressable>
+              )}
+              
         </ModalContent>
       </BottomModal>
     </>

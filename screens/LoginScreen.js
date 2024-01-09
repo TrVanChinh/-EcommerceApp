@@ -17,7 +17,7 @@ import auth from '@react-native-firebase/auth'
 import AuthGoogleButton from '../components/authGoogleButton'
 import { useUser } from '../UserContext';
 const LoginScreen = ({navigation}) => {
-  const { updateUser } = useUser();
+  const { updateUser} = useUser();
   const [inputValue, setInputValue] = useState("");
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);

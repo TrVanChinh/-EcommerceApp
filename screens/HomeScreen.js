@@ -61,96 +61,61 @@ const HomeScreen = ({ navigation }) => {
         },
         
     ])
-    const [productFlashSale, setProductFlashSale] = useState([
-        {
-            price: '21.000đ',
-            sale:'-22%',
-            url: 'https://down-vn.img.susercontent.com/file/vn-50009109-15c149fd06963a25db7d53ef2ef3b4df'
-        },
-        {
-            price: '302.000đ',
-            sale:'-37%',
-            url: 'https://down-vn.img.susercontent.com/file/vn-50009109-77fef5081a58b8f15f6da31d276cd1fa'
-        },
-        {
-            price: '298.800đ',
-            sale:'-25%',
-            url: 'https://down-vn.img.susercontent.com/file/vn-50009109-c9dd3eb33c9898df34abe4a3388dec89'
-        },
-        {
-            price: '433.000đ',
-            sale:'-33%',
-            url: 'https://down-vn.img.susercontent.com/file/vn-50009109-0b1e0b27deed9f7957e247bb9f662210'
-        },
-        {
-            price: '1.733.000đ',
-            sale:'-55%',
-            url: 'https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-loumoc6ug85s10'
-        },
-        {
-            price: '242.250đ',
-            sale:'-45%',
-            url: 'https://down-vn.img.susercontent.com/file/vn-11134601-7r98o-lobeu8g4o7w780'
-        },
-        {
-            price: '314.000đ',
-            sale:'-56%',
-            url: 'https://down-vn.img.susercontent.com/file/ccdf463d6f861bb0b1b84066c7f27f8f'
-        },
-        {
-            price: '440.000đ',
-            sale:'-35%',
-            url: 'https://down-vn.img.susercontent.com/file/vn-11134601-7r98o-lmsd9s4a310f18'
-        },
-        {
-            price: '980.000đ',
-            sale:'-45%',
-            url: 'https://down-vn.img.susercontent.com/file/736e1fdfd8d0616b9f63b7ad2246763e'
-        },
-        
-    ])
+
     const [product, setProduct] = useState([
         {
             sold:'234',
             price: '221.000đ',
             sale:'-22%',
             introduce:'Áo Nỉ Lót Lông Có Mũ Thời Trang THE GOOD/ Basic Hoodie',
-            url: 'https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-llei62d3h3go41'
+            url: 'https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-llei62d3h3go41',
+            name:'Áo hoodie nam nữ áo nỉ hoodie basic form rộng'
+
         },
         {
             sold:'224',
             price: '222.000đ',
             sale:'-37%',
             introduce:'Thắt Lưng Nam PISA Giấu Đuôi Dây Khóa Tự Động Da Bò Thật',
-            url: 'https://down-vn.img.susercontent.com/file/vn-11134207-7qukw-lgtepr0mzfoyca'
+            url: 'https://down-vn.img.susercontent.com/file/vn-11134207-7qukw-lgtepr0mzfoyca',
+            name:'Dây nịt thắt lưng nam da bò thật 2 lớp không có khóa đi kèm bền đẹp AMIRCUX'
+
         },
         {
             sold:'112',
             price: '398.800đ',
             sale:'-25%',
             introduce:'áo khoác gió vansity phối màu đen trắng',
-            url: 'https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-llv06xeia21ra9'
+            url: 'https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-llv06xeia21ra9',
+            name:'Áo khoác bomber nhung tăm cổ bẻ kiểu trơn 1 lớp dày dặn chuẩn form siêu xinh sành điệu cao cấp BẢO ĐĂNG'
+
         },
         {
             sold:'445',
             price: '34.000đ',
             sale:'-33%',
             introduce:'Sơn Bạc Mạ Crom Sơn Xịt Mạ Chrome Sáng Bóng 350ml',
-            url: 'https://down-vn.img.susercontent.com/file/sg-11134201-23030-gh8iuwuxc5nv0d'
+            url: 'https://down-vn.img.susercontent.com/file/sg-11134201-23030-gh8iuwuxc5nv0d',
+            name:'SƠN MẠ CROM CAO CẤP Chai 350ML'
+
         },
         {
             sold:'788',
             price: '1.733.000đ',
             sale:'-55%',
             introduce:'Freedom Mô Hình Nhân Vật gundam eg hg mg z nt unicorn',
-            url: 'https://down-vn.img.susercontent.com/file/cn-11134207-7r98o-lna6ztr124yjb0'
+            url: 'https://down-vn.img.susercontent.com/file/cn-11134207-7r98o-lna6ztr124yjb0',
+            name:'Mô Hình Ráp Sẵn Metal Build Takeda Shingen Limited Edition Màu đen phiên bản hội chợ WFC2023 của Moshow toys'
+
         },
         {
             sold:'755',
             price: '242.250đ',
             sale:'-45%',
             introduce:'1 Hồ Cá Sinh Thái Để Bàn Trang Trí Rượu hảo hạng của Hãng Marimo Eco',
-            url: 'https://down-vn.img.susercontent.com/file/d0a017b9eccfbd24cb829da32eb4ceea'
+            url: 'https://down-vn.img.susercontent.com/file/d0a017b9eccfbd24cb829da32eb4ceea',
+            name:'Bể Cá Nguyên Bộ SOBO - Tích Hợp sẵn Lọc và Đèn bên trong Hồ Cá'
+
         },
         
     ])
@@ -334,7 +299,8 @@ const HomeScreen = ({ navigation }) => {
                                         <Text style={{color:'yellow'}}>{item.sale}</Text>
                                     </View>
                                 </View>    
-                                <View style={{ width: 100, paddingBottom:10}}>
+                                <View style={{ width: 200, paddingBottom:10}}>
+                                <Text style={{fontSize: 18, color:'black'}} numberOfLines={1}>{item.name}</Text>
                                     <Text style={{ textAlign: "center",fontSize: 20, color:'red'}}>{item.price}</Text>
                                 </View>
                         </TouchableOpacity>
@@ -384,8 +350,9 @@ const HomeScreen = ({ navigation }) => {
                                         <Text style={{color:'yellow'}}>{item.data.discount}%</Text>
                                     </View>
                                 </View>    
-                                <View style={{ width: 100, paddingBottom:10}}>
-                                    <Text style={{ textAlign: "center",fontSize: 20, color:'red'}}>{item.data.price}</Text>
+                                <View style={{ width: 200, alignItems:'center', paddingBottom:10}}>
+                                    <Text style={{fontSize: 18, color:'black'}} numberOfLines={1}>{item.data.name}</Text>
+                                    <Text style={{ textAlign: "center",fontSize: 18, color:'red'}}>{item.data.price}đ</Text>
                                 </View>
                         </TouchableOpacity>
                     }}
