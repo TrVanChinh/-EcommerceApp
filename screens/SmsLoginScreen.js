@@ -19,7 +19,7 @@ import firebase from 'firebase/compat/app'
 import { useUser } from '../UserContext';
 
 const SmsLoginScreen = ({navigation}) => {
-  const { updateUser } = useUser();
+  const { updateUser} = useUser();
   const [phoneNumber, setPhoneNumber] = useState('')
   const [code, setCode] = useState('')
   const [verificationId, setVerificationId] = useState(null)
@@ -89,7 +89,7 @@ const SmsLoginScreen = ({navigation}) => {
       };
  
   const clearInput = () => {
-    setPhoneNumber("");
+    setPhoneNumber('');
   };
 
 
@@ -109,9 +109,10 @@ const SmsLoginScreen = ({navigation}) => {
         <KeyboardAvoidingView behavior="padding">
           <Input
             placeholder="Số điện thoại"
-            onChangeText={(text) => setPhoneNumber(text)}
+            onChangeText={setPhoneNumber}
             keyboardType="phone-pad"
             autoComplete="tel"
+            value={phoneNumber}
             leftIcon={<Feather name="phone" size={24} color="#857E7C" />}
             rightIcon={
               phoneNumber ? (
@@ -119,7 +120,7 @@ const SmsLoginScreen = ({navigation}) => {
                   name="close"
                   size={24}
                   color="#857E7C"
-                  onPress={clearInput}
+                  onPress={() => clearInput()}
                 />
               ) : null
             }
@@ -154,7 +155,7 @@ const SmsLoginScreen = ({navigation}) => {
           onPress={confirmCode}
       >
           <Text style={{ color: code.length > 0 ? "white" : "#857E7C" }}>
-          Login
+          Đăng nhập
           </Text>
       </TouchableOpacity>
       </View>

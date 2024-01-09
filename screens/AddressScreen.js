@@ -34,7 +34,7 @@ import {
 import { db } from "../firebase";
 
 const AddressScreen = ({navigation}) => {
-  const { user } = useUser();
+  const { user, updateAddress } = useUser();
   const idUser = user.user.uid
   const[address,setAddress] = useState([])
   const { height, width } = Dimensions.get("window");
@@ -71,7 +71,8 @@ const AddressScreen = ({navigation}) => {
   );
 
   const handleItemAddress = (address) => {
-    navigation.navigate('Order', { address });
+    updateAddress(address);
+    navigation.navigate('Order');
   };
   return (
     <>

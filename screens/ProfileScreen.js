@@ -7,6 +7,7 @@ import {
   View,
   Image,
   Alert,
+  Pressable,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -16,6 +17,9 @@ import {
   Entypo,
   AntDesign,
   Ionicons,
+  FontAwesome5,
+  MaterialCommunityIcons,
+  MaterialIcons,
 } from "@expo/vector-icons";
 import color from "../components/color";
 import auth from "@react-native-firebase/auth";
@@ -371,9 +375,73 @@ const ProfileScreen = ({ navigation }) => {
               />
             </View>
           </TouchableOpacity>
+          
 
+
+
+          {/* Đơn hàng */}
+          <TouchableOpacity
+            style={styles.list_items}
+          >
+            <View
+              style={{
+                alignItems: "flex-start",
+                flexDirection: "row",
+                alignItems: "center",
+                marginLeft: 10
+              }}
+              // onPress={() =>  navigation.navigate("PurchaseOrder")}
+            >
+              <FontAwesome5 name="receipt" size={24} color={color.origin} />
+              
+              <Text style={{ marginLeft: 10 }}>Đơn mua</Text>
+            </View>
+            <View
+              style={{
+                alignItems: "flex-end",
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <Text></Text>
+              <SimpleLineIcons
+                marginLeft={15}
+                name="arrow-right"
+                size={10}
+                color="#60698a"
+              />
+            </View>
+          </TouchableOpacity>
+            <View style={{ flex:1, flexDirection:"row", padding:12, backgroundColor:'white'}}> 
+              <Pressable
+                style={{ flex:1, alignItems:'center'}}
+                onPress={() => dataUser ? navigation.navigate("PurchaseOrder") : navigation.navigate("Login")}
+              >
+                <Ionicons name="wallet-outline" size={24} color={color.origin} />
+                <Text style={styles.text_order}>Chờ xác nhận</Text>
+              </Pressable>
+              <Pressable
+                style={{ flex:1, alignItems:'center'}}
+              >
+                <AntDesign name="inbox" size={24} color={color.origin} />
+                <Text style={styles.text_order}>Chờ lấy hàng</Text>
+              </Pressable>
+              <Pressable
+                style={{ flex:1, alignItems:'center'}}
+              >
+                <MaterialCommunityIcons name="truck-delivery-outline" size={24} color={color.origin} />
+                <Text style={styles.text_order}>Chờ giao hàng</Text>
+              </Pressable>
+              <Pressable
+                style={{ flex:1, alignItems:'center'}}
+              >
+                <MaterialIcons name="star-rate" size={24} color={color.origin} />
+                <Text style={styles.text_order}>Đánh giá</Text>
+              </Pressable>
+            </View>
           <Button title="Logout" onPress={handleLogout} disabled={!dataUser} />
         </View>
+        
       </ScrollView>
       
       
@@ -433,4 +501,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     backgroundColor: "white",
   },
+  text_order : {
+    fontSize:12,
+    color: color.origin
+  }
 });

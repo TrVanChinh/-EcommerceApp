@@ -68,6 +68,7 @@ const NewAddressScreen = ({navigation, route}) => {
             street: street,
           });
           alert('Thêm địa chỉ thành công.');
+          navigation.navigate('Address')
         }
        else {
         console.log('Người dùng không tồn tại.');
@@ -159,7 +160,7 @@ const NewAddressScreen = ({navigation, route}) => {
         }}
         onPress={()=> {
           lableProvinces === null || lableDistrict === null || lableWard === null || phoneNumber === null || name === null || street === null ? alert("Điền đầy đủ thông tin")
-          : addToAddress(userId) , navigation.navigate('Address')
+          : addToAddress(userId)
         }}
       >
         <Text style={{ color: lableProvinces === null || lableDistrict === null || lableWard === null || phoneNumber === null || name === null || street === null ? "black": "white",}}>HOÀN THÀNH</Text>

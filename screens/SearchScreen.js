@@ -309,8 +309,10 @@ const SearchScreen = ({ navigation, route }) => {
         <View style = {{ width: width, height: height/7, alignItems:'center', justifyContent:'center'}}>
           <Text style={{ color: color.origin }}>Không tìm thấy sản phẩm nào</Text>
         </View>
-        <View style={{ padding: 10, borderTopWidth:0.5,  }}>
-          <Text style={{ fontSize:16 , color: color.origin}}>Có thể bạn cũng thích</Text>
+        <View style={{ flexDirection: "row", alignItems: 'center', marginVertical: 20 }}>
+          <View style={{ flex: 1, height: 1, backgroundColor: "#D5DBCD" }}></View>
+          <Text style={{ color:color.origin}}>Có thể bạn cũng thích</Text>
+          <View style={{ flex: 1, height: 1, backgroundColor: "#D5DBCD"}}></View>
         </View>
         <FlatList
           numColumns={2}

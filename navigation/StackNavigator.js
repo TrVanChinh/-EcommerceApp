@@ -22,6 +22,8 @@ import SetUpAddressScreen from "../screens/SetUpAddressScreen";
 import UpdateAddressScreen from "../screens/UpdateAddressScreen";
 import ResetAddressScreen from "../screens/ResetAddressScreen";
 import ShopScreen from "../screens/ShopScreen";
+import PurchaseOrderScreen from "../screens/PurchaseOrderScreen";
+import ShippingUnitScreen from "../screens/ShippingUnitScreen";
 import {Entypo, AntDesign, Octicons , MaterialCommunityIcons, Ionicons, FontAwesome5  } from '@expo/vector-icons';
 const StackNavigator = () => {
   const Stack = createNativeStackNavigator();
@@ -149,6 +151,13 @@ const StackNavigator = () => {
         <Stack.Screen name="UpdateAddress" component={UpdateAddressScreen} options={{headerTitle: 'Cập nhật địa chỉ'}}/>
         <Stack.Screen name="ResetAddress" component={ResetAddressScreen} options={{headerTitle: 'Đặt lại địa chỉ'}}/>
         <Stack.Screen name="Shop" component={ShopScreen} options={{headerTitle: 'Xem Shop'}}/>
+
+
+
+        
+        <Stack.Screen name="PurchaseOrder" component={PurchaseOrderScreen} options={{headerTitle: 'Đơn mua'}}/>
+        <Stack.Screen name="ShippingUnit" component={ShippingUnitScreen} options={{headerTitle: 'Đơn vị vận chuyển'}}/>
+
       </Stack.Navigator>
     </NavigationContainer>
   );
