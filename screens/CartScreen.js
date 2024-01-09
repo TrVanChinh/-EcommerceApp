@@ -27,7 +27,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase";
 const CartScreen = ({navigation}) => {
-  const { user, updateProduct } = useUser();
+  const { user, updateProduct, updateAddress, updateShippingUnit } = useUser();
   const idUser = user.user.uid
   const[cart,setCart] = useState([])
   const [total, setTotal] = useState(0)
@@ -77,6 +77,7 @@ const CartScreen = ({navigation}) => {
         const productId = doc.data().productId;
         const optionProductId = doc.data().optionProductId;
         const quantity = doc.data().quantity;
+        
         const productInfo =  await getProductById(db,productId)
         const OptionproductRef = collection(db, 'product', productId, 'option');
         const optionProductSnapshot = await getDocs(OptionproductRef);
@@ -269,11 +270,13 @@ const handleItemCart = () => {
   }
 })
   updateProduct(products)
+  updateAddress(null)
+  updateShippingUnit(null)
   if(products.length === 0) {
     alert("Vui lòng chọn sản phẩm bạn muốn mua")
   } else {
-    navigation.navigate('Order', { products });
-    // navigation.navigate('Order');
+    // navigation.navigate('Order', { products });
+    navigation.navigate('Order');
 
   }  
     

@@ -18,7 +18,7 @@ import { useUser } from '../UserContext';
 const OTPScreen = ({ navigation, route }) => {
   
   const [code, setCode] = useState("");
-  const { updateUser } = useUser();
+  const { updateUser} = useUser();
   const  verificationId  = route.params;
   console.log(verificationId.verId)
 
