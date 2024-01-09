@@ -33,6 +33,8 @@ import EditUserInfoScreen from "../screens/EditUserInfoScreen";
 import {Entypo, AntDesign, Octicons , MaterialCommunityIcons, Ionicons, FontAwesome5  } from '@expo/vector-icons';
 import EditProductScreen from "../screens/Seller/EditProductScreen";
 import ShopInfoScreen from "../screens/Seller/ShopInfoScreen";
+import ShopOrdersScreen from "../screens/Seller/ShopOrdersScreen";
+import OrderItemScreen from "../screens/Seller/OrderItemScreen";
 const StackNavigator = () => {
   const Stack = createNativeStackNavigator();
   const Tab = createBottomTabNavigator();
@@ -262,6 +264,17 @@ const StackNavigator = () => {
           headerTitleAlign: "center"
         }}
         />
+        <Stack.Screen name="ShopOrders" component={ShopOrdersScreen} options={{
+          headerTitle: "Đơn hàng cửa hàng",          
+          headerTitleAlign: "center"
+        }}
+        />
+        <Stack.Screen name="OrderItem" component={OrderItemScreen} options={{
+          headerTitle: "Chi tiết đơn hàng",          
+          headerTitleAlign: "center"
+        }}
+        />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

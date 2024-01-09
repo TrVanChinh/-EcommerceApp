@@ -1,34 +1,17 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import {
   SimpleLineIcons,
   AntDesign,
   Octicons,
   MaterialCommunityIcons,
+  FontAwesome5,
 } from "@expo/vector-icons";
 import color from "../../components/color";
-const MyShopScreen = ({ navigation,route }) => {
-  const { idUser: idUser } = route.params;
+const MyShopScreen = ({ navigation }) => {
+  // const 
   return (
     <View>
-      <View style={styles.todo_list}>
-        <TouchableOpacity style={styles.todo_item}>
-          <Text style={styles.numberTodoItem}>100</Text>
-          <Text style={styles.todoItemText}>Chờ xác nhận</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.todo_item}>
-          <Text style={styles.numberTodoItem}>20</Text>
-          <Text style={styles.todoItemText}>Chờ lấy hàng</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.todo_item}>
-          <Text style={styles.numberTodoItem}>30</Text>
-          <Text style={styles.todoItemText}>Đã xử lý</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.todo_item}>
-          <Text style={styles.numberTodoItem}>10</Text>
-          <Text style={styles.todoItemText}>Đã hủy</Text>
-        </TouchableOpacity>
-      </View>
       {/* Thêm sp */}
       <TouchableOpacity
         style={styles.list_items}
@@ -131,13 +114,44 @@ const MyShopScreen = ({ navigation,route }) => {
           />
         </View>
       </TouchableOpacity>
+      {/* Quản lý đơn hàng */}
+      
+      <TouchableOpacity style={styles.list_items} onPress={() => navigation.navigate("ShopOrders")}>
+        <View
+          style={{
+            alignItems: "flex-start",
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <FontAwesome5
+            name="boxes"
+            size={25}
+            marginLeft={10}
+            color={color.origin}
+          />
+          <Text style={{ marginLeft: 10 }}>Đơn hàng của bạn </Text>
+        </View>
+        <View
+          style={{
+            alignItems: "flex-end",
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <SimpleLineIcons
+            marginLeft={15}
+            name="arrow-right"
+            size={10}
+            color="#60698a"
+          />
+        </View>
+      </TouchableOpacity>
       {/* Thông tin cửa hàng */}
       <TouchableOpacity
         style={styles.list_items}
         onPress={() =>
-          navigation.navigate("ShopInfo", {
-            idUser: idUser,
-          })
+          navigation.navigate("ShopInfo")
         }
       >
         <View

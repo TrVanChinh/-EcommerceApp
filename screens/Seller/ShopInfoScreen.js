@@ -23,11 +23,13 @@ import {
   import { FontAwesome5 } from "@expo/vector-icons";
   import * as ImagePicker from "expo-image-picker";
 import color from "../../components/color";
+import { useUser } from "../../UserContext";
 
 const ShopInfoScreen = ({navigation, route}) => {
-    const { idUser: idUser } = route.params;
+    const { user } = useUser();
+    const idUser = user?.user?.uid;
     const [avatar, setAvatar] = useState("");
-    const [user, setUser] = useState(null);
+    const [seller, setSeller] = useState(null);
     const [shopName, setShopName] = useState("");
     const [address, setAddress] = useState("");
     const [shopDescript, setShopDescript] = useState("");
@@ -38,20 +40,22 @@ const ShopInfoScreen = ({navigation, route}) => {
     const db = getFirestore(app);
   
     useEffect(() => {
+      console.log("iduser", idUser)
       getShopInfo();
     }, []);
   
+  useEffect(() => {
+    if (seller) {
+      setShopName(seller.shopName);
+      setAddress(seller.address);
+      setShopDescript(seller.shopDescript);
+      setPhoneNumber(seller.phone);
+      setAvatar(seller.photo);
+      //avatar gg = https://lh3.googleusercontent.com/a/ACg8ocJqThobPEndy9LkFEa0Dafe3pgnkZlr41UjDT3bKIUb_oU=s96-c
+    }
+  }, [seller]);
     // Update state inside the useEffect when data is fetched
-    useEffect(() => {
-      if (user) {
-        setShopName(user.shopName);
-        setAddress(user.address);
-        setShopDescript(user.shopDescript);
-        setPhoneNumber(user.phone);
-        setAvatar(user.photo);
-        //avatar gg = https://lh3.googleusercontent.com/a/ACg8ocJqThobPEndy9LkFEa0Dafe3pgnkZlr41UjDT3bKIUb_oU=s96-c
-      }
-    }, [user]);
+
   
     useEffect(() => {
       // Log giá trị mới của loaiHangImg sau mỗi lần cập nhật
@@ -64,7 +68,7 @@ const ShopInfoScreen = ({navigation, route}) => {
         const docSnap = await getDoc(docRef);
   
         // Set state only when data is available
-        setUser(docSnap.data());
+        setSeller(docSnap.data());
       } catch (error) {
         console.error("Error fetching user data:", error);
       }

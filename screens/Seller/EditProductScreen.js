@@ -45,6 +45,7 @@ import {
   endAsyncEvent,
   setEnabled,
 } from "react-native/Libraries/Performance/Systrace";
+import { useUser } from "../../UserContext";
 
 const EditProductScreen = ({ navigation, route }) => {
   const { idProduct: idProduct } = route.params;
@@ -57,7 +58,8 @@ const EditProductScreen = ({ navigation, route }) => {
   const [urlImage, setUrlImage] = useState([]);
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("");
-  const [userId, setUser] = useState(null);
+  const { user } = useUser();
+  const idUser = user?.user?.uid;
   const storage = getStorage();
   const [categories, setCategory] = useState([]);
   const { idSubcategory, nameSubcategory } = route.params || {};
@@ -74,14 +76,9 @@ const EditProductScreen = ({ navigation, route }) => {
   const [itemLoaiHang, setItemLoaiHang] = useState([]);
 
   useEffect(() => {
-    const unsubscribe = auth().onAuthStateChanged((authenticatedUser) => {
-      setUser(authenticatedUser.uid);
-    });
 
     getCategorytList();
     getProduct();
-    // Hủy người nghe khi component unmount
-    return () => unsubscribe();
   }, []);
 
   const getCategorytList = async () => {
@@ -295,7 +292,7 @@ const EditProductScreen = ({ navigation, route }) => {
         const blob = await response.blob();
 
         // Tạo tên file
-        const filename = userId + `_${index + 1}_${getCurrentTimestamp()}.jpg`;
+        const filename = idUser + `_${index + 1}_${getCurrentTimestamp()}.jpg`;
 
         const imageRef = ref(storageRef, filename);
 
@@ -347,7 +344,7 @@ const EditProductScreen = ({ navigation, route }) => {
       });
       setItemLoaiHang([]);
     } catch (e) {
-      console.log("Them option product loi", e);
+      console.log("Loi khi them phan loai hang", e);
     }
   };
 

@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   ScrollView,
@@ -19,19 +20,19 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Image } from "react-native-elements";
 import auth from "@react-native-firebase/auth";
+import { useUser } from "../../UserContext";
 //idUserTuong:SGRmRvN7t2aKv4ylKAmqs0Llbnr1
 
-const ListProducts = ({ navigation }) => {
-  const [user, setUser] = useState(null);
+const ListProducts = ({ navigation,route }) => {
+  const { user } = useUser();
+  const idUser = user?.user?.uid;
   const [name, setName] = useState("");
   const [products, setProducts] = useState([]);
   const db = getFirestore();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = auth().onAuthStateChanged((authenticatedUser) => {
-      setUser(authenticatedUser);
-
-      if (!authenticatedUser) {
+      if (idUser==="") {
         // Nếu user là null, hiển thị thông báo yêu cầu đăng nhập
         Alert.alert("Thông báo", "Vui lòng đăng nhập để tiếp tục.", [
           {
@@ -41,18 +42,16 @@ const ListProducts = ({ navigation }) => {
         ]);
       } else {
         // Nếu user không null, tiến hành lấy dữ liệu sản phẩm
-        getProductList(authenticatedUser);
+        getProductList();
       }
-    });
+    // });
 
-    return () => {
-      unsubscribe();
-    };
   }, []);
 
-  const getProductList = async (authenticatedUser) => {
+  const getProductList = async () => {
     // Lấy user ID
-    const userId = authenticatedUser.uid;
+    setLoading(true);
+    const userId = idUser;
     const q = query(collection(db, "product"), where("idShop", "==", userId));
     const querySnapshot = await getDocs(q);
     const listproducts = [];
@@ -77,41 +76,49 @@ const ListProducts = ({ navigation }) => {
     });
     await Promise.all(promises);
     setProducts(listproducts);
+    setLoading(false);
   };
   const showPrdID = (a) => {
     console.log("prdID:", a);
   };
   return (
-    <FlatList
-      data={products}
-      renderItem={({ item }) => (
-        <TouchableOpacity
-          key={item.id}
-          style={styles.item_prd}
-          onPress={() =>
-            navigation.navigate("EditProduct", { idProduct: item.idProduct })
-          }
-        >
-          <Image
-            source={{
-              uri: item.imageProduct,
-            }}
-            style={[styles.prd_image, { flex: 1 }]}
-          />
-          <View style={{ flex: 9, justifyContent: "space-between" }}>
-            <Text style={[styles.name_prd]}>{item.nameProduct}</Text>
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "flex-end",
-              }}
-            >
-              <Text style={styles.prd_price}>{item.priceProduct} vnđ</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
+    <View style={{ flex: 1 }}>
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
       )}
-    />
+      <FlatList
+        data={products}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            key={item.id}
+            style={styles.item_prd}
+            onPress={() =>
+              navigation.navigate("EditProduct", { idProduct: item.idProduct })
+            }
+          >
+            <Image
+              source={{
+                uri: item.imageProduct,
+              }}
+              style={[styles.prd_image, { flex: 1 }]}
+            />
+            <View style={{ flex: 9, justifyContent: "space-between" }}>
+              <Text style={[styles.name_prd]}>{item.nameProduct}</Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <Text style={styles.prd_price}>{item.priceProduct} vnđ</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        )}
+      />
+    </View>
   );
 };
 
@@ -148,5 +155,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginRight: 10,
     color: "red",
+  },
+  
+  loadingContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

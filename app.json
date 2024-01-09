@@ -7,6 +7,7 @@
         "expo-image-picker",
         {
           "photosPermission": "The app accesses your photos to let you share them with your friends."
+          
         }
       ],
       ["@react-native-google-signin/google-signin"],
@@ -36,7 +37,11 @@
       "supportsTablet": true
     },
     "android": {
-      "permissions": ["CAMERA_ROLL"],
+      "permissions": [
+        "CAMERA_ROLL",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
