@@ -58,7 +58,24 @@ const ProfileScreen = ({ navigation }) => {
     };
     fetchData();
   }, [user, idUser]);
-
+  useFocusEffect(
+    React.useCallback(() => {
+      // Nếu màn hình được focus (được hiển thị), thực hiện các hành động cần thiết
+      const fetchData = async () => {
+        try {
+          if (user) {
+            const docRef = doc(db, "user", idUser);
+            const docSnap = await getDoc(docRef);
+            console.log("dataUser", docSnap.data());
+            setDataUser(docSnap.data());
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      };
+      fetchData();
+    }, [])
+  );
   const handleLogout = () => {
     updateUser(null);
     setLogin(null);
