@@ -36,12 +36,22 @@ import { useFocusEffect } from "@react-navigation/native";
 import { app } from "../firebase";
 import { useUser } from '../UserContext';
 import { db } from "../firebase";
+import { useIsFocused } from "@react-navigation/native";
 
 const ProfileScreen = ({ navigation }) => {
   const { updateUser, user } = useUser();
   const [isLogin, setLogin] = useState(null);
   const [dataUser, setDataUser] = useState(null);
   const idUser = user?.user?.uid;
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (isFocused) {
+      if(user){
+        getUser();
+      }
+    }
+  }, [isFocused]);
   
   useEffect(() => {
     const fetchData = async () => {
@@ -58,24 +68,12 @@ const ProfileScreen = ({ navigation }) => {
     };
     fetchData();
   }, [user, idUser]);
-  useFocusEffect(
-    React.useCallback(() => {
-      // Nếu màn hình được focus (được hiển thị), thực hiện các hành động cần thiết
-      const fetchData = async () => {
-        try {
-          if (user) {
-            const docRef = doc(db, "user", idUser);
-            const docSnap = await getDoc(docRef);
-            console.log("dataUser", docSnap.data());
-            setDataUser(docSnap.data());
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-        }
-      };
-      fetchData();
-    }, [])
-  );
+  
+  const getUser = async () => {
+    const docRef = doc(db, "user", idUser);
+    const docSnap = await getDoc(docRef);
+    setDataUser(docSnap.data());
+  };
   const handleLogout = () => {
     updateUser(null);
     setLogin(null);
