@@ -142,18 +142,18 @@ const AddProductScreen = ({ navigation, route }) => {
             price: minPrice,
             quantity: totalQuantity,
           });
-          addOption(productId);
+          await addOption(productId);
         } else {
           const docRef = doc(db, "product", productId);
           await updateDoc(docRef, {
-            price: price,
-            quantity: quantity,
+            price: parseInt(price),
+            quantity: parseInt(quantity),
           });
           await addDoc(collection(db, "product", productId, "option"), {
             name:"     ",
             image:downloadURLs[0],
-            price: price,
-            quantity: quantity,
+            price: parseInt(price),
+            quantity: parseInt(quantity),
           });
         }
 
@@ -175,7 +175,7 @@ const AddProductScreen = ({ navigation, route }) => {
   const pickImages = async () => {
     if (images.length < 10) {
       let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsMultipleSelection: true,
         aspect: [4, 3],
         base64: true,
@@ -258,17 +258,28 @@ const AddProductScreen = ({ navigation, route }) => {
 
   const addOption = async (prdID) => {
     try {
-      itemLoaiHang.forEach(async (item) => {
+      for (const item of itemLoaiHang) {
         const loaiHangUrl = await uploadImage(item.loaiHangImg);
-        loaiHangUrl.forEach(async (url) => {
+        // for (const url of loaiHangUrl) {
           await addDoc(collection(db, "product", prdID, "option"), {
             name: item.loaiHang,
-            price: item.giaLoaiHang,
-            quantity: item.soLuong,
-            image: url,
+            price: Number(item.giaLoaiHang),
+            quantity: Number(item.soLuong),
+            image: loaiHangUrl[0],
           });
-        });
-      });
+        // }
+      }
+      // itemLoaiHang.forEach(async (item) => {
+      //   const loaiHangUrl = await uploadImage(item.loaiHangImg);
+      //   loaiHangUrl.forEach(async (url) => {
+      //     await addDoc(collection(db, "product", prdID, "option"), {
+      //       name: item.loaiHang,
+      //       price: Number(item.giaLoaiHang),
+      //       quantity: Number(item.soLuong),
+      //       image: url,
+      //     });
+      //   });
+      // });
       setItemLoaiHang([]);
     } catch (e) {
       console.log("Them option product loi", e);
@@ -373,7 +384,7 @@ const AddProductScreen = ({ navigation, route }) => {
         // Nếu không, thêm một item mới
         setItemLoaiHang([...itemLoaiHang, newItem]);
       }
-
+      console.log("itemLoaiHang", itemLoaiHang);
       // Đặt giá trị TextInput về rỗng
       setLoaiHang("");
       setSoLuong("");
