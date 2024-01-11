@@ -39,6 +39,7 @@ import {
   uploadBytes,
   uploadBytesResumable,
 } from "firebase/storage";
+import { useUser } from "../../UserContext";
 
 const AddProductScreen = ({ navigation, route }) => {
   const db = getFirestore();
@@ -49,10 +50,11 @@ const AddProductScreen = ({ navigation, route }) => {
   const [urlImage, setUrlImage] = useState([]);
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("");
-  const [idUser, setUser] = useState(null);
+  const { user } = useUser();
+  const idUser = user?.user?.uid;
   const storage = getStorage();
   const [categories, setCategory] = useState([]);
-  const { idSubcategory, nameSubcategory } = route.params || {};
+  const { idSubcategory, nameSubcategory,idCategory } = route.params || {};
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const toggleModal = () => {
@@ -65,13 +67,7 @@ const AddProductScreen = ({ navigation, route }) => {
   const [editItemId, setEditItemId] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = auth().onAuthStateChanged((authenticatedUser) => {
-      setUser(authenticatedUser.uid);
-    });
-
     getCategorytList();
-    // Hủy người nghe khi component unmount
-    return () => unsubscribe();
   }, []);
 
   const getCategorytList = async () => {
@@ -106,6 +102,7 @@ const AddProductScreen = ({ navigation, route }) => {
 
   const addProduct = async () => {
     const inputValues = [name, descript, idSubcategory];
+    const date = new Date(Date.now());
     if (areInputsFilled(inputValues)) {
       if (itemLoaiHang.length == 0 && !areInputsFilled([price, quantity])) {
         Alert.alert("Thông báo", "Nhập thiếu thông tin");
@@ -115,19 +112,14 @@ const AddProductScreen = ({ navigation, route }) => {
           name: name,
           description: descript,
           idShop: idUser,
+          atCreate: date,
+          idCategory: idCategory,
           sold: 0,
           idSubCategory: idSubcategory,
           discount: "",
         });
         console.log("Document written with ID: ", productRef.id);
         const productId = productRef.id;
-
-        const imageCollectionRef = collection(
-          db,
-          "product",
-          productId,
-          "image"
-        );
 
         // Thêm mỗi URL hình ảnh vào subcollection "images"
         downloadURLs.forEach(async (url) => {

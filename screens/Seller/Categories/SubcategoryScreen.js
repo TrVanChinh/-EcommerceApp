@@ -1,4 +1,5 @@
 import {
+  Alert,
   FlatList,
   StyleSheet,
   Text,
@@ -11,29 +12,8 @@ import { getFirestore } from "firebase/firestore";
 
 const SubcategoryScreen = ({ navigation, route }) => {
   const { subcategories: subcategories } = route.params;
-  const [subcategory, setSubcategory] = useState([]);
   const {isUpdate:isUpdate} = route.params;
   const db = getFirestore();
-
-  // useEffect(() => {
-  //   if (subcategory.length > 0) {
-  //     navigation.navigate("AddProduct", { subcategory: subcategory });
-  //     // console.log(subcategory);
-  //   }
-  // }, [subcategory]);
-
-  const selectSubcategory = (id, name) => {
-    idSubcate = id;
-    nameSubcate = name;
-    const list = [];
-    const sub = {
-      idSubcate,
-      nameSubcate,
-    };
-    list.push(sub);
-    setSubcategory(list);
-    // console.log(subcategory)
-  };
 
   return (
     <View>
@@ -44,6 +24,7 @@ const SubcategoryScreen = ({ navigation, route }) => {
             onPress={
               () => !isUpdate?
                 navigation.navigate("AddProduct", {
+                  idCategory:item.category,
                   idSubcategory: item.idSubcate,
                   nameSubcategory: item.nameSubcate,
                 }):
