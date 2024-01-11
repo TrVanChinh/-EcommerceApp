@@ -141,12 +141,22 @@ const ShopCategoryScreen = () => {
           <Text style={{ color: "white" }}>Hủy</Text>
         </TouchableOpacity>
       </View>
-      <View style={{ margin: 10, backgroundColor: "white", padding:10 }}>
+      <View style={{ margin: 10, backgroundColor: "white", padding: 10 }}>
         <Text style={{ fontWeight: "bold", textAlign: "center" }}>
           Danh sách danh mục
         </Text>
-        {shopCategory.map((item, key) => (          
-          <View key={key} style={{ flexDirection: "row", justifyContent: "space-between", borderTopColor:"lightgray", borderTopWidth:1 , marginVertical:5, paddingVertical:5}}>
+        {shopCategory.map((item, key) => (
+          <View
+            key={key}
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              borderTopColor: "lightgray",
+              borderTopWidth: 1,
+              marginVertical: 5,
+              paddingVertical: 5,
+            }}
+          >
             <Text>{item.name}</Text>
             <View style={{ flexDirection: "row" }}>
               <TouchableOpacity
