@@ -326,8 +326,8 @@ const DetailScreen = ({ navigation ,route }) => {
             )}
           </View>
           <View style={{ paddingTop: 10, paddingLeft: 5 }}>
-            <Text>Mô tả sản phẩm</Text>
-            <Text>{product.data.description}</Text>
+            <Text style={{ fontWeight: "bold"}}>Mô tả sản phẩm:</Text>
+            <Text style={{ padding: 10}}>{product.data.description}</Text>
           </View>
 
           {/* <View>

@@ -51,7 +51,7 @@
 //npm install @react-navigation/drawer
 //npx expo install react-native-gesture-handler react-native-reanimated
 
-//modal
+//modal 
 //npm i react-native-modals
 
 //npm install react-native-element-dropdown --save

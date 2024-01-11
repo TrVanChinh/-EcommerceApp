@@ -174,7 +174,8 @@ const HomeScreen = ({ navigation }) => {
         <ScrollView >
             <SlideShow/>
             <View style={{ position:"absolute", flexDirection:"row", alignItems:"center", justifyContent:"center"}}>  
-                <View style = {{
+                <Pressable 
+                    style = {{
                         height: 40,
                         width:"70%",
                         marginHorizontal: 10,
@@ -182,7 +183,9 @@ const HomeScreen = ({ navigation }) => {
                         alignItems: 'center',
                         backgroundColor:"white",
                         padding: 10,
-                    }}>
+                    }}
+                    onPress={() =>  handleSearch() }
+                    >
                     <TouchableOpacity
                         onPress={() => {
                             // if(search==''){
@@ -210,7 +213,7 @@ const HomeScreen = ({ navigation }) => {
                             }}
                             autoCorrect = {false} />
                     <AntDesign name="camerao" size={24} color="#857E7C" />
-                </View>
+                </Pressable>
                 <Pressable
                     onPress={()=> {
                         user ? navigation.navigate('Cart') :  navigation.navigate('Login')    

@@ -6,6 +6,7 @@ import {
     ScrollView,
     Pressable,
     TextInput,
+    TouchableOpacity,
     Image,
     Dimensions,
     FlatList,
@@ -21,7 +22,7 @@ import {
   } from "react";
   import { useFocusEffect } from "@react-navigation/native";
   import { Feather, AntDesign } from "@expo/vector-icons";  
-  import { collection, doc, query, where, onSnapshot, getDocs, getDoc , and } from 'firebase/firestore';
+  import { collection, doc, query, where, onSnapshot, getDocs, getDoc ,updateDoc , and } from 'firebase/firestore';
   import { db } from "../firebase";
   import { useUser } from '../UserContext';
 
@@ -31,6 +32,10 @@ import {
     const { height, width } = Dimensions.get("window");
     const [menu, setMenu] = useState('Chờ xác nhận');
     const [order, setOrder] = useState([])
+    const [deliveringOrder, setDeliveringOrder ] = useState([])
+    const [deliveredOrder, setDeliveredOrder ] = useState([])
+    const [cancelOrder, setCancelOrder ] = useState([])
+    const [refresh, setRefresh] = useState(false);
 
     const handlePress = (menuValue) => {
         setMenu(menuValue);
@@ -72,20 +77,20 @@ import {
               }));
               
               orderPromises.push({
-                dataInfoOrder: { orderData, option }
+                dataInfoOrder: { orderData, option, ordersId }
               });
           }
           const ordersDataArray = await Promise.all(orderPromises);
           setOrder(ordersDataArray);
 
-          ordersDataArray.forEach(data => {
-            // const optionDatas = data.dataInfoOrder.orderData.totalByShop
-            // console.log("dataInfoOrder", optionDatas)
-            const optionDatas = data.dataInfoOrder.option
-              optionDatas.forEach(option => {
-                console.log("option:  ", option.data.data.option.quantity) 
-              })
-            })
+          // ordersDataArray.forEach(data => {
+          //   const optionDatas = data.dataInfoOrder.ordersId
+          //   console.log("dataInfoOrder", optionDatas)
+          //   // const optionDatas = data.dataInfoOrder.option
+          //   //   optionDatas.forEach(option => {
+          //   //     console.log("option:  ", option.data.data.option.quantity) 
+          //   //   })
+          //   })
 
           // ordersDataArray.forEach(data => {
           //   const optionDatas = data.dataInfoOrder.option
@@ -119,6 +124,179 @@ import {
       } catch (error) {
         console.error('Lỗi khi lấy dữ liệu đơn hàng:', error);
         throw error;
+      }
+    };
+
+    const GetDeliveredOrderData = async (idUser) => {
+      try {
+        const q = query(
+          collection(db, 'order'),
+          where('idUser', '==', idUser),
+          where('status', '==', 'đang vận chuyển'))
+        const querySnapshot = await getDocs(q);
+        const orderPromises = [];
+
+          for (const orderDoc of querySnapshot.docs) {
+            const ordersId = orderDoc.id;
+            const orderData = orderDoc.data();
+            const optionSnapshot = await getDocs(collection(doc(db, 'order', ordersId), 'option'));
+            const optionPromises = [];
+
+            optionSnapshot.forEach(async (doc) => {
+                const optionData = doc.data()
+                const idOption = optionData.idOption
+                const idProduct = optionData.idProduct
+                const quantity = optionData.quantity
+                const price = optionData.price
+                const promise = fetchOptionData(idProduct,idOption, quantity, price)
+                // console.log("kết quả", productOptionData.data.option.id)
+                if (promise !== undefined) {
+                  optionPromises.push(promise);
+                } else {
+                  console.error(`fetchOptionData returned undefined for idProduct: ${idProduct}, idOption: ${idOption}`);
+                }
+              })
+              const optionDataArray = await Promise.all(optionPromises);
+              const option = optionDataArray.map(productOptionData => ({
+                data: productOptionData
+              }));
+              
+              orderPromises.push({
+                dataInfoOrder: { orderData, option }
+              });
+          }
+          const ordersDataArray = await Promise.all(orderPromises);
+          setDeliveringOrder(ordersDataArray);
+
+          ordersDataArray.forEach(data => {
+            const optionDatas = data.dataInfoOrder.option
+              optionDatas.forEach(option => {
+                console.log("option:  ", option.data.data.option.quantity) 
+              })
+            })
+
+      } catch (error) {
+        console.error('Lỗi khi lấy dữ liệu đơn hàng:', error);
+        throw error;
+      }
+    };
+
+    const GetDeliveryOrderData = async (idUser) => {
+      try {
+        const q = query(
+          collection(db, 'order'),
+          where('idUser', '==', idUser),
+          where('status', '==', 'đã giao hàng'))
+        const querySnapshot = await getDocs(q);
+        const orderPromises = [];
+
+          for (const orderDoc of querySnapshot.docs) {
+            const ordersId = orderDoc.id;
+            const orderData = orderDoc.data();
+            const optionSnapshot = await getDocs(collection(doc(db, 'order', ordersId), 'option'));
+            const optionPromises = [];
+
+            optionSnapshot.forEach(async (doc) => {
+                const optionData = doc.data()
+                const idOption = optionData.idOption
+                const idProduct = optionData.idProduct
+                const quantity = optionData.quantity
+                const price = optionData.price
+                const promise = fetchOptionData(idProduct,idOption, quantity, price)
+                // console.log("kết quả", productOptionData.data.option.id)
+                if (promise !== undefined) {
+                  optionPromises.push(promise);
+                } else {
+                  console.error(`fetchOptionData returned undefined for idProduct: ${idProduct}, idOption: ${idOption}`);
+                }
+              })
+              const optionDataArray = await Promise.all(optionPromises);
+              const option = optionDataArray.map(productOptionData => ({
+                data: productOptionData
+              }));
+              
+              orderPromises.push({
+                dataInfoOrder: { orderData, option }
+              });
+          }
+          const ordersDataArray = await Promise.all(orderPromises);
+          setDeliveredOrder(ordersDataArray);
+
+          ordersDataArray.forEach(data => {
+            const optionDatas = data.dataInfoOrder.option
+              optionDatas.forEach(option => {
+                console.log("option:  ", option.data.data.option.quantity) 
+              })
+            })
+
+      } catch (error) {
+        console.error('Lỗi khi lấy dữ liệu đơn hàng:', error);
+        throw error;
+      }
+    };
+
+    const GetcancelOrder = async (idUser) => {
+      try {
+        const q = query(
+          collection(db, 'order'),
+          where('idUser', '==', idUser),
+          where('status', '==', 'đã hủy'))
+        const querySnapshot = await getDocs(q);
+        const orderPromises = [];
+
+          for (const orderDoc of querySnapshot.docs) {
+            const ordersId = orderDoc.id;
+            const orderData = orderDoc.data();
+            const optionSnapshot = await getDocs(collection(doc(db, 'order', ordersId), 'option'));
+            const optionPromises = [];
+
+            optionSnapshot.forEach(async (doc) => {
+                const optionData = doc.data()
+                const idOption = optionData.idOption
+                const idProduct = optionData.idProduct
+                const quantity = optionData.quantity
+                const price = optionData.price
+                const promise = fetchOptionData(idProduct,idOption, quantity, price)
+                // console.log("kết quả", productOptionData.data.option.id)
+                if (promise !== undefined) {
+                  optionPromises.push(promise);
+                } else {
+                  console.error(`fetchOptionData returned undefined for idProduct: ${idProduct}, idOption: ${idOption}`);
+                }
+              })
+              const optionDataArray = await Promise.all(optionPromises);
+              const option = optionDataArray.map(productOptionData => ({
+                data: productOptionData
+              }));
+              
+              orderPromises.push({
+                dataInfoOrder: { orderData, option }
+              });
+          }
+          const ordersDataArray = await Promise.all(orderPromises);
+          setCancelOrder(ordersDataArray);
+
+          ordersDataArray.forEach(data => {
+            const optionDatas = data.dataInfoOrder.option
+              optionDatas.forEach(option => {
+                console.log("option:  ", option.data.data.option.quantity) 
+              })
+            })
+
+      } catch (error) {
+        console.error('Lỗi khi lấy dữ liệu đơn hàng:', error);
+        throw error;
+      }
+    };
+
+    const updateOrderStatus = async (orderId) => {
+      const orderDocRef = doc(db, 'order', orderId); 
+      try {
+        await updateDoc(orderDocRef, { status: 'đã hủy' });
+        setRefresh(true); 
+        console.log('Cập nhật trạng thái thành công');
+      } catch (error) {
+        console.error('Lỗi khi cập nhật trạng thái:', error);
       }
     };
 
@@ -161,7 +339,11 @@ import {
 
     useEffect (() => {
       getOrderData(idUser)
-    },[])
+      GetDeliveryOrderData(idUser)
+      GetDeliveredOrderData(idUser)
+      GetcancelOrder(idUser)
+      setRefresh(false);
+    },[refresh])
 
     return (
       <View>
@@ -186,19 +368,11 @@ import {
   
           <Pressable 
               style={{...styles.buttonArrange,
-                  borderColor: menu === 'Chờ lấy hàng' ?  "#F1582C" :"white"  
+                  borderColor: menu === 'đang vận chuyển' ?  "#F1582C" :"white"  
               }}
-              onPress={() => handlePress('Chờ lấy hàng')}
+              onPress={() => handlePress('đang vận chuyển')}
           >
-            <Text style={styles.text_order}>Chờ lấy hàng</Text>
-          </Pressable>
-          <Pressable 
-              style={{...styles.buttonArrange,
-                  borderColor: menu === 'Chờ giao hàng' ?  "#F1582C" :"white"  
-              }}
-              onPress={() => handlePress('Chờ giao hàng')}
-          >
-            <Text style={styles.text_order}>Đang giao</Text>
+            <Text style={styles.text_order}>Đang vận chuyển</Text>
           </Pressable>
           <Pressable 
               style={{...styles.buttonArrange,
@@ -218,76 +392,294 @@ import {
           </Pressable>
         </View>
         <ScrollView> 
+        {  menu === 'Chờ xác nhận' ? (
           <View style={{ marginHorizontal: 10 }}>
             {order ? (
-              <>
-              {order?.map((option, index) =>
-                <View
-                  key={index}
-                  style={{
-                    backgroundColor: "white",
-                    marginBottom: 10,
-                    borderBottomColor: "#F0F0F0",
-                    borderWidth: 2,
-                    borderLeftWidth: 0,
-                    borderTopWidth: 0,
-                    borderRightWidth: 0,
-                  }}
-                >
-                {option?.dataInfoOrder.option.map((item, index) => 
-                <View key={index}>
-                  <Pressable
+                <>
+                {order?.map((option, index) =>
+                  <View
+                    key={index}
                     style={{
-                      flexDirection: "row",
+                      backgroundColor: "white",
+                      marginBottom: 10,
+                      borderBottomColor: "#F0F0F0",
+                      borderWidth: 2,
+                      borderLeftWidth: 0,
+                      borderTopWidth: 0,
+                      borderRightWidth: 0,
                     }}
-                    // onPress={() =>  navigation.navigate('Detail', {product: item.product})}
                   >
-                    <View style={{
-                      paddingRight: 10,
-                    }}>
-                      <Image
-                        style={{ width: 100, height: 120, resizeMode: "contain",  }}
-                        source={{uri: item?.data.data.option.data.image}}
-                      />
-                    </View>
-      
-                    <View>
-                      <Text numberOfLines={3} style={{ width: 200, fontSize:16, marginTop: 10 }}>
-                      {item?.data.data.name}
-                      </Text>
-                      <Text numberOfLines={3} style={{ width: 200, fontSize:16, marginTop: 10 }}>
-                        {item?.data.data.option.data.name}
-                      </Text>
-                      <Text
-                        style={{fontSize: 15, fontWeight: "bold", marginTop: 6 }}
-                      >
-                        Giá: {item?.data.data.option.price}đ 
-                      </Text>
-                      <Text
-                        style={{fontSize: 15, fontWeight: "bold", marginTop: 6 }}
-                      >
-                        Số lượng: {item?.data.data.option.quantity}
-                      </Text>
-                    
-                    </View>
+                  {option?.dataInfoOrder.option.map((item, index) => 
+                  <View key={index}>
+                    <Pressable
+                      style={{
+                        flexDirection: "row",
+                      }}
+                      // onPress={() =>  navigation.navigate('Detail', {product: item.product})}
+                    >
+                      <View style={{
+                        paddingRight: 10,
+                      }}>
+                        <Image
+                          style={{ width: 100, height: 120, resizeMode: "contain",  }}
+                          source={{uri: item?.data.data.option.data.image}}
+                        />
+                      </View>
+        
+                      <View>
+                        <Text numberOfLines={3} style={{ width: 200, fontSize:16, marginTop: 10 }}>
+                        {item?.data.data.name}
+                        </Text>
+                        <Text numberOfLines={3} style={{ width: 200, fontSize:16, marginTop: 10 }}>
+                          {item?.data.data.option.data.name}
+                        </Text>
+                        <Text
+                          style={{fontSize: 15, fontWeight: "bold", marginTop: 6 }}
+                        >
+                          Giá: {item?.data.data.option.price}đ 
+                        </Text>
+                        <Text
+                          style={{fontSize: 15, fontWeight: "bold", marginTop: 6 }}
+                        >
+                          Số lượng: {item?.data.data.option.quantity}
+                        </Text>
+                      
+                      </View>
+                    </Pressable>
+                  </View>
+                  )} 
+                  <Text
+                    style={{ color:'red',fontSize: 15, alignSelf:"center",fontWeight: "bold", padding: 6 }}
+                  >
+                    Tổng đơn hàng: {option.dataInfoOrder.orderData.totalByShop}đ 
+                  </Text>
+                  <Pressable 
+                    style={{alignSelf:"center", padding: 6, backgroundColor:'red', marginBottom:10 }}
+                    onPress={() => updateOrderStatus(option.dataInfoOrder.ordersId)}
+                  >
+                    <Text style={{ color:'white'}}>Hủy đơn hàng</Text>
                   </Pressable>
                 </View>
-                )} 
-                <Text
-                  style={{ color:'red',fontSize: 15, alignSelf:"center",fontWeight: "bold", padding: 6 }}
-                >
-                  Tổng đơn hàng: {option.dataInfoOrder.orderData.totalByShop}đ 
-                </Text>
-              </View>
-            )}
-            </>
-            ) : (
-              <View>
-                <Text>Bạn chưa có đơn hàng nào</Text>
-              </View>
-            )}
-          
+              )}
+              </>
+              ) : (
+                <View>
+                  <Text>Bạn chưa có đơn hàng nào</Text>
+                </View>
+              )} 
           </View>
+        ) : menu === 'đang vận chuyển' ? (
+          <View style={{ marginHorizontal: 10 }}>
+            {deliveringOrder ? (
+                <>
+                {deliveringOrder ?.map((option, index) =>
+                  <View
+                    key={index}
+                    style={{
+                      backgroundColor: "white",
+                      marginBottom: 10,
+                      borderBottomColor: "#F0F0F0",
+                      borderWidth: 2,
+                      borderLeftWidth: 0,
+                      borderTopWidth: 0,
+                      borderRightWidth: 0,
+                    }}
+                  >
+                  {option?.dataInfoOrder.option.map((item, index) => 
+                  <View key={index}>
+                    <Pressable
+                      style={{
+                        flexDirection: "row",
+                      }}
+                      // onPress={() =>  navigation.navigate('Detail', {product: item.product})}
+                    >
+                      <View style={{
+                        paddingRight: 10,
+                      }}>
+                        <Image
+                          style={{ width: 100, height: 120, resizeMode: "contain",  }}
+                          source={{uri: item?.data.data.option.data.image}}
+                        />
+                      </View>
+        
+                      <View>
+                        <Text numberOfLines={3} style={{ width: 200, fontSize:16, marginTop: 10 }}>
+                        {item?.data.data.name}
+                        </Text>
+                        <Text numberOfLines={3} style={{ width: 200, fontSize:16, marginTop: 10 }}>
+                          {item?.data.data.option.data.name}
+                        </Text>
+                        <Text
+                          style={{fontSize: 15, fontWeight: "bold", marginTop: 6 }}
+                        >
+                          Giá: {item?.data.data.option.price}đ 
+                        </Text>
+                        <Text
+                          style={{fontSize: 15, fontWeight: "bold", marginTop: 6 }}
+                        >
+                          Số lượng: {item?.data.data.option.quantity}
+                        </Text>
+                      
+                      </View>
+                    </Pressable>
+                  </View>
+                  )} 
+                  <Text
+                    style={{ color:'red',fontSize: 15, alignSelf:"center",fontWeight: "bold", padding: 6 }}
+                  >
+                    Tổng đơn hàng: {option.dataInfoOrder.orderData.totalByShop}đ 
+                  </Text>
+                </View>
+              )}
+              </>
+              ) : ( 
+                <View>
+                  <Text>Bạn chưa có đơn hàng đang giao</Text>
+                </View>
+              )} 
+          </View>
+        ) : menu === 'Đã giao' ? (
+          <View style={{ marginHorizontal: 10 }}>
+            {deliveredOrder ? (
+                <>
+                {deliveredOrder ?.map((option, index) =>
+                  <View
+                    key={index}
+                    style={{
+                      backgroundColor: "white",
+                      marginBottom: 10,
+                      borderBottomColor: "#F0F0F0",
+                      borderWidth: 2,
+                      borderLeftWidth: 0,
+                      borderTopWidth: 0,
+                      borderRightWidth: 0,
+                    }}
+                  >
+                  {option?.dataInfoOrder.option.map((item, index) => 
+                  <View key={index}>
+                    <Pressable
+                      style={{
+                        flexDirection: "row",
+                      }}
+                      // onPress={() =>  navigation.navigate('Detail', {product: item.product})}
+                    >
+                      <View style={{
+                        paddingRight: 10,
+                      }}>
+                        <Image
+                          style={{ width: 100, height: 120, resizeMode: "contain",  }}
+                          source={{uri: item?.data.data.option.data.image}}
+                        />
+                      </View>
+        
+                      <View>
+                        <Text numberOfLines={3} style={{ width: 200, fontSize:16, marginTop: 10 }}>
+                        {item?.data.data.name}
+                        </Text>
+                        <Text numberOfLines={3} style={{ width: 200, fontSize:16, marginTop: 10 }}>
+                          {item?.data.data.option.data.name}
+                        </Text>
+                        <Text
+                          style={{fontSize: 15, fontWeight: "bold", marginTop: 6 }}
+                        >
+                          Giá: {item?.data.data.option.price}đ 
+                        </Text>
+                        <Text
+                          style={{fontSize: 15, fontWeight: "bold", marginTop: 6 }}
+                        >
+                          Số lượng: {item?.data.data.option.quantity}
+                        </Text>
+                      
+                      </View>
+                    </Pressable>
+                  </View>
+                  )} 
+                  <Text
+                    style={{ color:'red',fontSize: 15, alignSelf:"center",fontWeight: "bold", padding: 6 }}
+                  >
+                    Tổng đơn hàng: {option.dataInfoOrder.orderData.totalByShop}đ 
+                  </Text>
+                </View>
+              )}
+              </>
+              ) : (
+                <View>
+                  <Text>Bạn chưa có đơn hàng nào</Text>
+                </View>
+              )} 
+          </View>
+        ) : (
+          <View style={{ marginHorizontal: 10 }}>
+            {cancelOrder ? (
+                <>
+                {cancelOrder ?.map((option, index) =>
+                  <View
+                    key={index}
+                    style={{
+                      backgroundColor: "white",
+                      marginBottom: 10,
+                      borderBottomColor: "#F0F0F0",
+                      borderWidth: 2,
+                      borderLeftWidth: 0,
+                      borderTopWidth: 0,
+                      borderRightWidth: 0,
+                    }}
+                  >
+                  {option?.dataInfoOrder.option.map((item, index) => 
+                  <View key={index}>
+                    <Pressable
+                      style={{
+                        flexDirection: "row",
+                      }}
+                      // onPress={() =>  navigation.navigate('Detail', {product: item.product})}
+                    >
+                      <View style={{
+                        paddingRight: 10,
+                      }}>
+                        <Image
+                          style={{ width: 100, height: 120, resizeMode: "contain",  }}
+                          source={{uri: item?.data.data.option.data.image}}
+                        />
+                      </View>
+        
+                      <View>
+                        <Text numberOfLines={3} style={{ width: 200, fontSize:16, marginTop: 10 }}>
+                        {item?.data.data.name}
+                        </Text>
+                        <Text numberOfLines={3} style={{ width: 200, fontSize:16, marginTop: 10 }}>
+                          {item?.data.data.option.data.name}
+                        </Text>
+                        <Text
+                          style={{fontSize: 15, fontWeight: "bold", marginTop: 6 }}
+                        >
+                          Giá: {item?.data.data.option.price}đ 
+                        </Text>
+                        <Text
+                          style={{fontSize: 15, fontWeight: "bold", marginTop: 6 }}
+                        >
+                          Số lượng: {item?.data.data.option.quantity}
+                        </Text>
+                      
+                      </View>
+                    </Pressable>
+                  </View>
+                  )} 
+                  <Text
+                    style={{ color:'red',fontSize: 15, alignSelf:"center",fontWeight: "bold", padding: 6 }}
+                  >
+                    Tổng đơn hàng: {option.dataInfoOrder.orderData.totalByShop}đ 
+                  </Text>
+                </View>
+              )}
+              </>
+              ) : (
+                <View>
+                  <Text>Bạn chưa có đơn hàng nào</Text>
+                </View>
+              )} 
+          </View>
+        )}
+
         </ScrollView>
       </View>
     );

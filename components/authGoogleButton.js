@@ -73,7 +73,6 @@ const authGoogleButton = ({ onLoginSuccess }) => {
       const userCredential = await auth().signInWithCredential(googleCredential);
       // Get the current user after successful sign-in
       const currentUser = userCredential.user;
-      console.log(currentUser.uid);
       const existingUserDoc = await db.collection("user").doc(currentUser.uid).get();
       const isNewUser = !existingUserDoc.exists;
       if (isNewUser) {

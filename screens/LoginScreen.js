@@ -16,6 +16,9 @@ import { GoogleSignin, GoogleSigninButton } from '@react-native-google-signin/go
 import auth from '@react-native-firebase/auth'
 import AuthGoogleButton from '../components/authGoogleButton'
 import { useUser } from '../UserContext';
+import { doc, getDoc, getFirestore, updateDoc, setDoc , getDocs, collection } from "firebase/firestore";
+import { db } from "../firebase";
+
 const LoginScreen = ({navigation}) => {
   const { updateUser} = useUser();
   const [inputValue, setInputValue] = useState("");
@@ -32,6 +35,46 @@ const LoginScreen = ({navigation}) => {
     console.log('Login success:', user);
     navigation.navigate('Main')
   }
+
+  // const loginUser = async () => {
+  //   try {
+  //     if (password === "" || inputValue === "") {
+  //       alert("Không được để trống");
+  //       return;
+  //     }  
+  //     const userCollectionRef = collection(db, "user");
+  //     const querySnapshot = await getDocs(userCollectionRef);
+  
+  //     let userFound = false;
+  
+  //     querySnapshot.forEach((doc) => {
+  //       const userData = doc.data();
+  //       // Kiểm tra thông tin đăng nhập
+  //       if (
+  //         (userData.hasOwnProperty("email") && userData.email === inputValue) ||
+  //         (userData.hasOwnProperty("mobileNo") && userData.mobileNo === inputValue)
+  //       ) {
+  //         if (userData.hasOwnProperty("password") && userData.password === password) {
+  //           userFound = true;
+  //           const userId = doc.id;
+  //           updateUser(userId)
+  //         }
+  //       }
+  //     });
+  
+  //     if (!userFound) {
+  //       Alert.alert("Thông báo", "Thông tin đăng nhập không đúng");
+  //     }else{
+  //       navigation.navigate("Main")
+  //     }
+  //   } catch (e) {
+  //     console.error(e);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  
+
   return (
     <SafeAreaView style={{ width: "100%", alignItems: "center" }}>
       <View> 
@@ -43,7 +86,7 @@ const LoginScreen = ({navigation}) => {
       <View style={{ width: "90%", top: 30 }}>
         <KeyboardAvoidingView behavior="padding">
           <Input
-            placeholder="Số điện thoại"
+            placeholder="Số điện thoại / email"
             onChangeText={(text) => setInputValue(text)}
             value={inputValue}
             leftIcon={<SimpleLineIcons name="user" size={24} color="#857E7C" />}
@@ -82,7 +125,7 @@ const LoginScreen = ({navigation}) => {
           }}
           disabled={inputValue.length === 0}
           onPress={() => {
-            alert("hehe");
+            loginUser()
           }}
         >
           <Text style={{ color: inputValue.length > 0 ? "white" : "#857E7C" }}>
