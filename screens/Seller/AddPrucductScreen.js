@@ -30,7 +30,7 @@ import {
   collection,
   getDocs,
   getFirestore,
-  updateDoc
+  updateDoc,
 } from "firebase/firestore";
 import {
   getDownloadURL,
@@ -39,6 +39,7 @@ import {
   uploadBytes,
   uploadBytesResumable,
 } from "firebase/storage";
+import { useUser } from "../../UserContext";
 
 const AddProductScreen = ({ navigation, route }) => {
   const db = getFirestore();
@@ -49,10 +50,11 @@ const AddProductScreen = ({ navigation, route }) => {
   const [urlImage, setUrlImage] = useState([]);
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("");
-  const [idUser, setUser] = useState(null);
+  const { user } = useUser();
+  const idUser = user?.user?.uid;
   const storage = getStorage();
   const [categories, setCategory] = useState([]);
-  const { idSubcategory, nameSubcategory } = route.params || {};
+  const { idSubcategory, nameSubcategory, idCategory } = route.params || {};
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const toggleModal = () => {
@@ -64,15 +66,24 @@ const AddProductScreen = ({ navigation, route }) => {
   const [itemLoaiHang, setItemLoaiHang] = useState([]);
   const [editItemId, setEditItemId] = useState(null);
 
-  useEffect(() => {
-    const unsubscribe = auth().onAuthStateChanged((authenticatedUser) => {
-      setUser(authenticatedUser.uid);
-    });
+  const [shopCategory, setShopCategory] = useState([]);
+  const [selectedShopCategoryId, setSelectedShopCategoryId] = useState(null);
 
+  useEffect(() => {
     getCategorytList();
-    // Hủy người nghe khi component unmount
-    return () => unsubscribe();
+    getShopCategory();
   }, []);
+
+  const getShopCategory = async () => {
+    const querySnapshot = await getDocs(
+      collection(db, "user", idUser, "categoryShop")
+    );
+    let temp = [];
+    querySnapshot.forEach((doc) => {
+      temp.push({ id: doc.id, ...doc.data() });
+    });
+    setShopCategory(temp);
+  };
 
   const getCategorytList = async () => {
     setCategory([]);
@@ -106,6 +117,7 @@ const AddProductScreen = ({ navigation, route }) => {
 
   const addProduct = async () => {
     const inputValues = [name, descript, idSubcategory];
+    const date = new Date(Date.now());
     if (areInputsFilled(inputValues)) {
       if (itemLoaiHang.length == 0 && !areInputsFilled([price, quantity])) {
         Alert.alert("Thông báo", "Nhập thiếu thông tin");
@@ -115,19 +127,15 @@ const AddProductScreen = ({ navigation, route }) => {
           name: name,
           description: descript,
           idShop: idUser,
+          idCategoryShop: selectedShopCategoryId,
+          atCreate: date,
+          idCategory: idCategory,
           sold: 0,
           idSubCategory: idSubcategory,
           discount: "",
         });
         console.log("Document written with ID: ", productRef.id);
         const productId = productRef.id;
-
-        const imageCollectionRef = collection(
-          db,
-          "product",
-          productId,
-          "image"
-        );
 
         // Thêm mỗi URL hình ảnh vào subcollection "images"
         downloadURLs.forEach(async (url) => {
@@ -150,8 +158,8 @@ const AddProductScreen = ({ navigation, route }) => {
             quantity: parseInt(quantity),
           });
           await addDoc(collection(db, "product", productId, "option"), {
-            name:"     ",
-            image:downloadURLs[0],
+            name: "     ",
+            image: downloadURLs[0],
             price: parseInt(price),
             quantity: parseInt(quantity),
           });
@@ -162,7 +170,7 @@ const AddProductScreen = ({ navigation, route }) => {
           {
             text: "OK",
             onPress: () => {
-              navigation.navigate("MyShop",{idUser:idUser});
+              navigation.navigate("MyShop", { idUser: idUser });
             },
           },
         ]);
@@ -196,7 +204,14 @@ const AddProductScreen = ({ navigation, route }) => {
       Alert.alert("Thông báo", "Đã đủ 10 ảnh");
     }
   };
-
+  const handleCategoryPress = (categoryId, categoryName) => {
+    Alert.alert(
+      "Thông tin danh mục",
+      `ID: ${categoryId}\nTên: ${categoryName}`,
+      [{ text: "OK", onPress: () => console.log("OK Pressed") }],
+      { cancelable: false }
+    );
+  };
   const uploadImage = async (listImage) => {
     if (listImage.length > 0) {
       const storageRef = ref(storage, "productImg");
@@ -261,12 +276,12 @@ const AddProductScreen = ({ navigation, route }) => {
       for (const item of itemLoaiHang) {
         const loaiHangUrl = await uploadImage(item.loaiHangImg);
         // for (const url of loaiHangUrl) {
-          await addDoc(collection(db, "product", prdID, "option"), {
-            name: item.loaiHang,
-            price: Number(item.giaLoaiHang),
-            quantity: Number(item.soLuong),
-            image: loaiHangUrl[0],
-          });
+        await addDoc(collection(db, "product", prdID, "option"), {
+          name: item.loaiHang,
+          price: Number(item.giaLoaiHang),
+          quantity: Number(item.soLuong),
+          image: loaiHangUrl[0],
+        });
         // }
       }
       // itemLoaiHang.forEach(async (item) => {
@@ -531,7 +546,7 @@ const AddProductScreen = ({ navigation, route }) => {
         />
       </View>
 
-      {/* Danh muc */}
+      {/* Ngành hàng */}
       <TouchableOpacity
         onPress={() =>
           navigation.navigate("SelectCategory", { categories: categories })
@@ -564,6 +579,29 @@ const AddProductScreen = ({ navigation, route }) => {
           />
         </View>
       </TouchableOpacity>
+
+      <View style={{ marginVertical: 10, backgroundColor: "white" }}>
+        <Text style={{ fontWeight: "bold", textAlign: "center", marginVertical:5 }}>
+          Chọn danh mục cửa hàng
+        </Text>
+        {shopCategory.map((item, key) => (
+          <TouchableOpacity
+            key={key}
+            onPress={() => setSelectedShopCategoryId(item.id)}
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              paddingVertical: 10,
+              paddingHorizontal: 20,
+              borderTopWidth: 1,
+              borderTopColor: "#ddd",
+              backgroundColor: selectedShopCategoryId === item.id ? "#ddd": "white",
+            }}
+          >
+            <Text>{item.name}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
       {/* Phân loại hàng */}
       <Modal

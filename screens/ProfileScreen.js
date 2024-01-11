@@ -393,7 +393,7 @@ const ProfileScreen = ({ navigation }) => {
               {/* My shop */}
               <TouchableOpacity
                 style={styles.list_items}
-                onPress={() => navigation.navigate("MyShop", {idUser: isLogin.uid})}
+                onPress={() => navigation.navigate("MyShop", {idUser: idUser})}
               >
                 <View
                   style={{

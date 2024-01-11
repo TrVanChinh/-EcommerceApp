@@ -37,6 +37,7 @@ import EditProductScreen from "../screens/Seller/EditProductScreen";
 import ShopInfoScreen from "../screens/Seller/ShopInfoScreen";
 import ShopOrdersScreen from "../screens/Seller/ShopOrdersScreen";
 import OrderItemScreen from "../screens/Seller/OrderItemScreen";
+import ShopCategoryScreen from "../screens/Seller/ShopCategoryScreen";
 const StackNavigator = () => {
   const Stack = createNativeStackNavigator();
   const Tab = createBottomTabNavigator();
@@ -278,6 +279,7 @@ const StackNavigator = () => {
           headerTitleAlign: "center"
         }}
         />
+        <Stack.Screen name="ShopCategory" component={ShopCategoryScreen} />
 
       </Stack.Navigator>
     </NavigationContainer>

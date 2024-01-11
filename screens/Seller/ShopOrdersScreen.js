@@ -24,6 +24,7 @@ import { db } from "../../firebase";
 import { getBytes } from "firebase/storage";
 import { Image } from "react-native";
 import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
+import { useIsFocused } from "@react-navigation/native";
 
 const ShopOrdersScreen = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState("tab1");
@@ -36,25 +37,31 @@ const ShopOrdersScreen = ({ navigation }) => {
   const [shippingOrders, setShippingOrders] = useState([]);
   const [completedOrders, setCompletedOrders] = useState([]);
   const [cancelledOrders, setCancelledOrders] = useState([]);
+  const isFocused = useIsFocused();
 
+  // useEffect(() => {
+  //   fetchData();
+  // }, []);
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [confirmOrders, shippingOrders, completedOrders, cancelledOrders] = await Promise.all([
+        getConfirmOrders(),
+        getShippingOrders(),
+        getCompletedOrders(),
+        getCancelledOrders()
+      ]);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        await getConfirmOrders();
-        await getShippingOrders();
-        await getCompletedOrders();
-        await getCancelledOrders();
-      } catch (error) {
-        console.error("Error fetching orders:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
+    if (isFocused) {
+      fetchData();
+    }
+  }, [isFocused]);
   const convertDate = (timestamp) => {
     const date = new Date(
       timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000
@@ -132,7 +139,7 @@ const ShopOrdersScreen = ({ navigation }) => {
     const q = query(
       collection(db, "order"),
       where("idShop", "==", idUser),
-      where("status", "==", "đã giao")
+      where("status", "==", "đã giao hàng")
     );
     const querySnapshot = await getDocs(q);
     const orders = [];
@@ -174,167 +181,187 @@ const ShopOrdersScreen = ({ navigation }) => {
     setCancelledOrders(orders);
   };
   return (
-    <View style={{flex:1}}>
+    <View style={{ flex: 1 }}>
       <ScrollView
-        contentContainerStyle={{ flex: 1, justifyContent: 'flex-start' }}        
+        contentContainerStyle={{ flex: 1, justifyContent: "flex-start" }}
       >
-      <View style={styles.todo_list}>
-        <TouchableOpacity
-          style={[
-            styles.todo_item,
-            { borderColor: selectedTab === "tab1" ? "red" : "lightgray" },
-          ]}
-          onPress={() => setSelectedTab("tab1")}
-        >
-          <Text style={styles.numberTodoItem}>{confirmOrders.length}</Text>
-          <Text style={styles.todoItemText}>Chờ xác nhận</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.todo_item,
-            { borderColor: selectedTab === "tab2" ? "red" : "lightgray" },
-          ]}
-          onPress={() => setSelectedTab("tab2")}
-        >
-          <Text style={styles.numberTodoItem}>{shippingOrders.length}</Text>
-          <Text style={styles.todoItemText}>Đang vận chuyển</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.todo_item,
-            { borderColor: selectedTab === "tab3" ? "red" : "lightgray" },
-          ]}
-          onPress={() => setSelectedTab("tab3")}
-        >
-          <Text style={styles.numberTodoItem}>{completedOrders.length}</Text>
-          <Text style={styles.todoItemText}>Đã xử lý</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.todo_item,
-            { borderColor: selectedTab === "tab4" ? "red" : "lightgray" },
-          ]}
-          onPress={() => setSelectedTab("tab4")}
-        >
-          <Text style={styles.numberTodoItem}>{cancelledOrders.length}</Text>
-          <Text style={styles.todoItemText}>Đã hủy</Text>
-        </TouchableOpacity>
-      </View>
-      <View>
-        {selectedTab === "tab1" ? (
-          <View>
-            {confirmOrders.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.listItem}
-                onPress={() =>
-                  navigation.navigate("OrderItem", { idOrder: item.id })
-                }
-              >
-                <Image source={{ uri: item.image }} style={styles.buyerImage} />
-                <View style={styles.orderInfo}>
-                  <Text style={styles.buyerName}>
-                    Người mua: {item.buyerName}
-                  </Text>
-                  <Text style={styles.idOrder}>ID đơn hàng: {item.id}</Text>
-                  <Text style={styles.atCreate}>Ngày mua: {item.atCreate}</Text>
-                  <Text style={styles.totalByShop}>
-                    Tổng tiền: {item.totalByShop}đ
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        ) : (
-          <View></View>
-        )}
-        {selectedTab === "tab2" ? (
-          <View>
-            {shippingOrders.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.listItem}
-                onPress={() =>
-                  navigation.navigate("OrderItem", { idOrder: item.id })
-                }
-              >
-                <Image source={{ uri: item.image }} style={styles.buyerImage} />
-                <View style={styles.orderInfo}>
-                  <Text style={styles.buyerName}>
-                    Người mua: {item.buyerName}
-                  </Text>
-                  <Text style={styles.idOrder}>ID đơn hàng: {item.id}</Text>
-                  <Text style={styles.atCreate}>Ngày mua: {item.atCreate}</Text>
-                  <Text style={styles.totalByShop}>
-                    Tổng tiền: {item.totalByShop}đ
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        ) : (
-          <View></View>
-        )}
-        {selectedTab === "tab3" ? (
-          <View>
-            {completedOrders.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.listItem}
-                onPress={() =>
-                  navigation.navigate("OrderItem", { idOrder: item.id })
-                }
-              >
-                <Image source={{ uri: item.image }} style={styles.buyerImage} />
-                <View style={styles.orderInfo}>
-                  <Text style={styles.buyerName}>
-                    Người mua: {item.buyerName}
-                  </Text>
-                  <Text style={styles.idOrder}>ID đơn hàng: {item.id}</Text>
-                  <Text style={styles.atCreate}>Ngày mua: {item.atCreate}</Text>
-                  <Text style={styles.totalByShop}>
-                    Tổng tiền: {item.totalByShop}đ
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        ) : (
-          <View></View>
-        )}
-        {selectedTab === "tab4" ? (
-          <View>
-            {cancelledOrders.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.listItem}
-                onPress={() =>
-                  navigation.navigate("OrderItem", { idOrder: item.id })
-                }
-              >
-                <Image source={{ uri: item.image }} style={styles.buyerImage} />
-                <View style={styles.orderInfo}>
-                  <Text style={styles.buyerName}>
-                    Người mua: {item.buyerName}
-                  </Text>
-                  <Text style={styles.idOrder}>ID đơn hàng: {item.id}</Text>
-                  <Text style={styles.atCreate}>Ngày mua: {item.atCreate}</Text>
-                  <Text style={styles.totalByShop}>
-                    Tổng tiền: {item.totalByShop}đ
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        ) : (
-          <View></View>
-        )}
-        {loading && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#0000ff" />
-          </View>
-        )}
-      </View>
+        <View style={styles.todo_list}>
+          <TouchableOpacity
+            style={[
+              styles.todo_item,
+              { borderColor: selectedTab === "tab1" ? "red" : "lightgray" },
+            ]}
+            onPress={() => setSelectedTab("tab1")}
+          >
+            <Text style={styles.numberTodoItem}>{confirmOrders.length}</Text>
+            <Text style={styles.todoItemText}>Chờ xác nhận</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.todo_item,
+              { borderColor: selectedTab === "tab2" ? "red" : "lightgray" },
+            ]}
+            onPress={() => setSelectedTab("tab2")}
+          >
+            <Text style={styles.numberTodoItem}>{shippingOrders.length}</Text>
+            <Text style={styles.todoItemText}>Đang vận chuyển</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.todo_item,
+              { borderColor: selectedTab === "tab3" ? "red" : "lightgray" },
+            ]}
+            onPress={() => setSelectedTab("tab3")}
+          >
+            <Text style={styles.numberTodoItem}>{completedOrders.length}</Text>
+            <Text style={styles.todoItemText}>Đã xử lý</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.todo_item,
+              { borderColor: selectedTab === "tab4" ? "red" : "lightgray" },
+            ]}
+            onPress={() => setSelectedTab("tab4")}
+          >
+            <Text style={styles.numberTodoItem}>{cancelledOrders.length}</Text>
+            <Text style={styles.todoItemText}>Đã hủy</Text>
+          </TouchableOpacity>
+        </View>
+        <View>
+          {selectedTab === "tab1" ? (
+            <View>
+              {confirmOrders.map((item, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.listItem}
+                  onPress={() =>
+                    navigation.navigate("OrderItem", { idOrder: item.id })
+                  }
+                >
+                  <Image
+                    source={{ uri: item.image }}
+                    style={styles.buyerImage}
+                  />
+                  <View style={styles.orderInfo}>
+                    <Text style={styles.buyerName}>
+                      Người mua: {item.buyerName}
+                    </Text>
+                    <Text style={styles.idOrder}>ID đơn hàng: {item.id}</Text>
+                    <Text style={styles.atCreate}>
+                      Ngày mua: {item.atCreate}
+                    </Text>
+                    <Text style={styles.totalByShop}>
+                      Tổng tiền: {item.totalByShop}đ
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : (
+            <View></View>
+          )}
+          {selectedTab === "tab2" ? (
+            <View>
+              {shippingOrders.map((item, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.listItem}
+                  onPress={() =>
+                    navigation.navigate("OrderItem", { idOrder: item.id })
+                  }
+                >
+                  <Image
+                    source={{ uri: item.image }}
+                    style={styles.buyerImage}
+                  />
+                  <View style={styles.orderInfo}>
+                    <Text style={styles.buyerName}>
+                      Người mua: {item.buyerName}
+                    </Text>
+                    <Text style={styles.idOrder}>ID đơn hàng: {item.id}</Text>
+                    <Text style={styles.atCreate}>
+                      Ngày mua: {item.atCreate}
+                    </Text>
+                    <Text style={styles.totalByShop}>
+                      Tổng tiền: {item.totalByShop}đ
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : (
+            <View></View>
+          )}
+          {selectedTab === "tab3" ? (
+            <View>
+              {completedOrders.map((item, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.listItem}
+                  onPress={() =>
+                    navigation.navigate("OrderItem", { idOrder: item.id })
+                  }
+                >
+                  <Image
+                    source={{ uri: item.image }}
+                    style={styles.buyerImage}
+                  />
+                  <View style={styles.orderInfo}>
+                    <Text style={styles.buyerName}>
+                      Người mua: {item.buyerName}
+                    </Text>
+                    <Text style={styles.idOrder}>ID đơn hàng: {item.id}</Text>
+                    <Text style={styles.atCreate}>
+                      Ngày mua: {item.atCreate}
+                    </Text>
+                    <Text style={styles.totalByShop}>
+                      Tổng tiền: {item.totalByShop}đ
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : (
+            <View></View>
+          )}
+          {selectedTab === "tab4" ? (
+            <View>
+              {cancelledOrders.map((item, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.listItem}
+                  onPress={() =>
+                    navigation.navigate("OrderItem", { idOrder: item.id })
+                  }
+                >
+                  <Image
+                    source={{ uri: item.image }}
+                    style={styles.buyerImage}
+                  />
+                  <View style={styles.orderInfo}>
+                    <Text style={styles.buyerName}>
+                      Người mua: {item.buyerName}
+                    </Text>
+                    <Text style={styles.idOrder}>ID đơn hàng: {item.id}</Text>
+                    <Text style={styles.atCreate}>
+                      Ngày mua: {item.atCreate}
+                    </Text>
+                    <Text style={styles.totalByShop}>
+                      Tổng tiền: {item.totalByShop}đ
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : (
+            <View></View>
+          )}
+          {loading && (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+          )}
+        </View>
       </ScrollView>
     </View>
   );

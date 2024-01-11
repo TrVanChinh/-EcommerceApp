@@ -24,6 +24,7 @@ const CategoryScreen = ({ route, navigation }) => {
       if(isUpdate){
         navigation.navigate("SelectSubcategory", { subcategories: subcategories, isUpdate:true });
       }else{
+        // console.log(subcategories.idSubcate)
         navigation.navigate("SelectSubcategory", { subcategories: subcategories });
       }
       
@@ -36,19 +37,15 @@ const CategoryScreen = ({ route, navigation }) => {
     docSnap.forEach((doc) => {
       idSubcate = doc.id;
       nameSubcate = doc.data().name;
+      category= idcatergory;
       const cateOject = {
         idSubcate,
         nameSubcate,
+        category
       };
       list.push(cateOject)
-      // console.log(doc.id, " => ", doc.data());
     });
-    
-    // setSubcategory((preCate)=>[...preCate,...list])
     setSubcategory(list)
-    // setSubcategory(list)
-    // console.log(subcategories)
-    // navigation.navigate("SelectSubcategory",{ subcategories: subcategories })
   };
   return (
     <View>
