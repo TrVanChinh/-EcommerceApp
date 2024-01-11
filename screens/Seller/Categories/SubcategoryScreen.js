@@ -29,6 +29,7 @@ const SubcategoryScreen = ({ navigation, route }) => {
                   nameSubcategory: item.nameSubcate,
                 }):
                 navigation.navigate("EditProduct", {
+                  idCategory:item.category,
                   idSubcategory: item.idSubcate,
                   nameSubcategory: item.nameSubcate,
                 })

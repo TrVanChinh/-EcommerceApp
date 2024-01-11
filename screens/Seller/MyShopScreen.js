@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import {
   SimpleLineIcons,
   AntDesign,
+  Entypo,
   Octicons,
   MaterialCommunityIcons,
   FontAwesome5,
@@ -82,8 +83,8 @@ const MyShopScreen = ({ navigation }) => {
           />
         </View>
       </TouchableOpacity>
-      {/* Thống kê */}
-      <TouchableOpacity style={styles.list_items}>
+      {/* Quản lý danh mục shop*/}
+      <TouchableOpacity style={styles.list_items} onPress={()=> navigation.navigate("ShopCategory")}>
         <View
           style={{
             alignItems: "flex-start",
@@ -91,13 +92,13 @@ const MyShopScreen = ({ navigation }) => {
             alignItems: "center",
           }}
         >
-          <Octicons
-            name="graph"
+          <Entypo
+            name="list"
             size={25}
             marginLeft={10}
             color={color.origin}
           />
-          <Text style={{ marginLeft: 10 }}>X Thống kê </Text>
+          <Text style={{ marginLeft: 10 }}>Danh mục cửa hàng </Text>
         </View>
         <View
           style={{

@@ -62,6 +62,7 @@ const ListProducts = ({ navigation,route }) => {
       const cltImg = collection(val, "image");
       const getValue = await getDocs(cltImg);
       const idProduct = a.id;
+      const sold = a.data().sold;
       const nameProduct = a.data().name;
       const priceProduct = a.data().price;
       const imageProduct = getValue.docs[0].data().url;
@@ -69,6 +70,7 @@ const ListProducts = ({ navigation,route }) => {
         idProduct,
         nameProduct,
         imageProduct,
+        sold,
         priceProduct,
       };
       listproducts.push(prdOject);
@@ -83,11 +85,6 @@ const ListProducts = ({ navigation,route }) => {
   };
   return (
     <View style={{ flex: 1 }}>
-      {loading && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#0000ff" />
-        </View>
-      )}
       <FlatList
         data={products}
         renderItem={({ item }) => (
@@ -106,6 +103,7 @@ const ListProducts = ({ navigation,route }) => {
             />
             <View style={{ flex: 9, justifyContent: "space-between" }}>
               <Text style={[styles.name_prd]}>{item.nameProduct}</Text>
+              <Text style={{marginLeft:10}}>Đã bán: {item.sold>=0?item.sold:0}</Text>
               <View
                 style={{
                   flexDirection: "row",
@@ -118,6 +116,11 @@ const ListProducts = ({ navigation,route }) => {
           </TouchableOpacity>
         )}
       />
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      )}
     </View>
   );
 };
@@ -143,6 +146,7 @@ const styles = StyleSheet.create({
 
   name_prd: {
     fontWeight: "bold",
+    marginLeft:10
   },
   prd_image: {
     width: 70,

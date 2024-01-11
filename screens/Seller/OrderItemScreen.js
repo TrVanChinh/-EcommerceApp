@@ -12,6 +12,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  or,
   updateDoc,
 } from "firebase/firestore";
 import { db } from "../../firebase";
@@ -29,8 +30,10 @@ const OrderItemScreen = ({ navigation, route }) => {
   }, []);
   const fetchData = async () => {
     setLoading(true);
-    await getOrder();
-    await getOrderDetail();
+    const [t1,t2] = await Promise.all([
+      getOrder(),
+      getOrderDetail(),
+    ]);
     setLoading(false);
   };
   const getOrder = async () => {
@@ -48,7 +51,7 @@ const OrderItemScreen = ({ navigation, route }) => {
       buyerName: buyer.name,
       atCreate: convertDate(docSnap.data().atCreate),
       image: buyer.photo,
-      idUser: docSnap.data().idUser,
+      idUser: docSnap.data().idUser,      
       status: docSnap.data().status,
       totalByShop: formatPrice(docSnap.data().totalByShop),
       receiver: address.name,
@@ -126,10 +129,12 @@ const OrderItemScreen = ({ navigation, route }) => {
         item.data().idOption
       );
       items.push({
+        idProduct: item.data().idProduct,
+        idOptionProduct: item.data().idOption,
         image: optionInfo.image,
-        idProduct: prdInfo.name,
-        idOptionPruct: optionInfo.name,
-        price: formatPrice(item.data().price),
+        nameProduct: prdInfo.name,
+        nameOptionPruct: optionInfo.name,
+        price: item.data().price,
         quantity: item.data().quantity,
       });
     }
@@ -153,11 +158,44 @@ const OrderItemScreen = ({ navigation, route }) => {
     ]);
   };
 
+  const updatePropuctQuantity = async (idProduct, idOption, quantity) => {
+    //update quantity trong option
+    const docRef = doc(db, "product", idProduct, "option", idOption);
+    const docSnap = await getDoc(docRef);
+    const quantityOption = docSnap.data().quantity;
+    await updateDoc(docRef, {
+      quantity: quantityOption - quantity,
+    });
+  };
+
   const deliveredOrder = async () => {
     setLoading(true);
+
+    //update status
     const docRef = doc(db, "order", idOrder);
     await updateDoc(docRef, {
       status: "đã giao hàng",
+    });
+
+    //update sold
+    const docRef2 = doc(db, "product", orderItems[0].idProduct);
+    const docSnap2 = await getDoc(docRef2);
+    const prdIf = docSnap2.data();
+    let sold = 0;
+    if (prdIf.sold !== undefined) {
+      sold = prdIf.sold
+    }
+    for (const item of orderItems) {
+      await updatePropuctQuantity(
+        item.idProduct,
+        item.idOptionProduct,
+        item.quantity
+      );
+      sold += item.quantity;
+    }
+    
+    await updateDoc(docRef2, {
+      sold: sold,
     });
     setLoading(false);
     Alert.alert("Thông báo", "Đơn hàng đã giao", [
@@ -169,7 +207,16 @@ const OrderItemScreen = ({ navigation, route }) => {
       },
     ]);
   };
-  
+
+  const calculateTotal = () => {
+    let total = 0;
+    orderItems.forEach((item) => {
+      total += item.price * item.quantity;
+    });
+    // return total;\
+    return formatPrice(total);
+  };
+
   const formatPrice = (price) => {
     // Sử dụng Intl.NumberFormat để định dạng số thành chuỗi với dấu ngăn cách hàng nghìn
     return new Intl.NumberFormat("vi-VN", {
@@ -181,49 +228,60 @@ const OrderItemScreen = ({ navigation, route }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <View style={{ padding: 10 }}>
-        <Text style={{ fontWeight: "bold" }}>
+      <View style={styles.listItem}>
+        <Text style={styles.textTitle}>
           Trạng thái đơn hàng: {order.status}
         </Text>
-        <Text style={{ fontWeight: "bold" }}>Mã đơn hàng:{order.id}</Text>
-        <Text style={{ fontWeight: "bold" }}>
-          Người đặt hàng:{order.buyerName}
-        </Text>
-        <Text style={{ fontWeight: "bold" }}>
-          Ngày đặt hàng:{order.atCreate}
-        </Text>
-        <Text style={{ fontWeight: "bold" }}>
-          Người nhận hàng:{order.receiver}
-        </Text>
-        <Text style={{ fontWeight: "bold" }}>
-          Số điện thoại:{order.phoneNum}
-        </Text>
-        <Text style={{ fontWeight: "bold" }}>
-          Địa chỉ nhận hàng:{order.address}
+        <Text style={styles.textItem}>Mã đơn hàng: {order.id}</Text>
+        <Text style={styles.textItem}>Người đặt hàng: {order.buyerName}</Text>
+        <Text style={styles.textItem}>Ngày đặt hàng: {order.atCreate}</Text>
+      </View>
+      <View style={styles.listItem}>
+        <Text style={styles.textTitle}>Thông tin giao hàng</Text>
+        <Text style={styles.textItem}>Người nhận hàng: {order.receiver}</Text>
+        <Text style={styles.textItem}>Số điện thoại: {order.phoneNum}</Text>
+        <Text style={styles.textItem}>Địa chỉ nhận hàng: {order.address}</Text>
+      </View>
+      <View style={styles.listItem}>
+        <Text style={styles.textTitle}>Thông tin sản phẩm</Text>
+        {orderItems.map((item, index) => (
+          <TouchableOpacity
+            key={index}
+            style={[
+              styles.orderItems,
+              { borderTopWidth: 1, borderColor: "lightgray" },
+            ]}
+          >
+            <Image
+              source={{ uri: item.image }}
+              style={{ width: 50, height: 50 }}
+            />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.prdName}>{item.nameProduct}</Text>
+              <Text style={styles.prdOption}>Loại: {item.nameOptionPruct}</Text>
+              <Text style={styles.prdQty}>Số lượng: {item.quantity}</Text>
+              <Text style={styles.prdPrice}>
+                Giá: {formatPrice(item.price)}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+        <Text
+          style={[
+            styles.prdPrice,
+            { fontWeight: "bold", fontSize: 16, marginTop: 5 },
+          ]}
+        >
+          Thành tiền: {calculateTotal()}
         </Text>
       </View>
-      <Text style={{ fontWeight: "bold" }}>Thông tin sản phẩm</Text>
-      {orderItems.map((item, index) => (
-        <TouchableOpacity key={index} style={styles.orderItems}>
-          <Image
-            source={{ uri: item.image }}
-            style={{ width: 50, height: 50 }}
-          />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.prdName}>{item.idProduct}</Text>
-            <Text style={styles.prdOption}>Loại: {item.idOptionPruct}</Text>
-            <Text style={styles.prdQty}>Số lượng: {item.quantity}</Text>
-            <Text style={styles.prdPrice}>Giá: {item.price}</Text>
-          </View>
-        </TouchableOpacity>
-      ))}
-      <Text style={{ fontWeight: "bold" }}>Thông tin vận chuyển</Text>
-      <Text style={{ fontWeight: "bold" }}>
-        Đơn vị vận chuyển: {order.shippingUnit}
-      </Text>
-      <Text style={{ fontWeight: "bold" }}>
-        Phí vận chuyển: {order.shipCost}
-      </Text>
+      <View style={styles.listItem}>
+        <Text style={styles.textTitle}>Thông tin vận chuyển {}</Text>
+        <Text style={styles.textItem}>
+          Đơn vị vận chuyển: {order.shippingUnit}
+        </Text>
+        <Text style={styles.textItem}>Phí vận chuyển: {order.shipCost}</Text>
+      </View>
       <View
         style={{
           flexDirection: "row",
@@ -257,7 +315,9 @@ const OrderItemScreen = ({ navigation, route }) => {
               alignItems: "center",
               flex: 1,
             }}
-            onPress={() => order.status==="đang xử lý"?confirmOrder():deliveredOrder()}
+            onPress={() =>
+              order.status=== "đang chờ xử lý" ? confirmOrder() : deliveredOrder()
+            }
           >
             <Text
               style={{
@@ -266,11 +326,10 @@ const OrderItemScreen = ({ navigation, route }) => {
                 fontWeight: "bold",
               }}
             >
-              Xác nhận
+              {order.status=== "đang chờ xử lý" ? "Xác nhận" : "Đã giao hàng"}
             </Text>
           </TouchableOpacity>
-        )         
-        }
+        )}
       </View>
       {loading && (
         <View style={styles.loadingContainer}>
@@ -290,20 +349,35 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  listItem: {
+    backgroundColor: "white",
+    padding: 10,
+    marginVertical: 5,
+  },
+  textItem: {
+    // fontWeight: "bold",
+    marginLeft: 25,
+  },
+  textTitle: {
+    fontWeight: "bold",
+    fontSize: 16,
+    marginVertical: 5,
+    marginLeft: 10,
+  },
   orderItems: {
     flexDirection: "row",
     // justifyContent: "space-between",
     alignItems: "center",
     // padding: 20,
-    marginVertical: 8,
+    // marginVertical: 8,
     backgroundColor: "white",
   },
   prdName: {
-    // width: "40%",
+    marginLeft: 10,
     fontWeight: "bold",
   },
   prdOption: {
-    // width: "20%",
+    marginLeft: 10,
   },
   prdPrice: {
     // width: "20%",
@@ -311,6 +385,6 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
   },
   prdQty: {
-    // width: "20%",
+    marginLeft: 10,
   },
 });

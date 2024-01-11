@@ -39,16 +39,18 @@ const ShopOrdersScreen = ({ navigation }) => {
   const [cancelledOrders, setCancelledOrders] = useState([]);
   const isFocused = useIsFocused();
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // useEffect(() => {
+  //   fetchData();
+  // }, []);
   const fetchData = async () => {
     try {
       setLoading(true);
-      await getConfirmOrders();
-      await getShippingOrders();
-      await getCompletedOrders();
-      await getCancelledOrders();
+      const [confirmOrders, shippingOrders, completedOrders, cancelledOrders] = await Promise.all([
+        getConfirmOrders(),
+        getShippingOrders(),
+        getCompletedOrders(),
+        getCancelledOrders()
+      ]);
     } catch (error) {
       console.error("Error fetching orders:", error);
     } finally {
