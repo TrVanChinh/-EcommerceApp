@@ -23,7 +23,6 @@ import {
 import { db } from "../../firebase";
 import { getBytes } from "firebase/storage";
 import { Image } from "react-native";
-import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 import { useIsFocused } from "@react-navigation/native";
 
 const ShopOrdersScreen = ({ navigation }) => {

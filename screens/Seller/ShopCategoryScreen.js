@@ -45,6 +45,9 @@ const ShopCategoryScreen = () => {
   };
 
   const addCategory = async () => {
+    if (name === "") {
+      Alert.alert("Thông báo", "Chưa nhập tên danh mục");      
+    }else{
     try {
       await addDoc(collection(db, "user", idUser, "categoryShop"), {
         name: name,
@@ -54,6 +57,7 @@ const ShopCategoryScreen = () => {
     } catch (e) {
       console.error("Error adding document: ", e);
     }
+  }
   };
 
   const updateCategory = async () => {
@@ -157,7 +161,7 @@ const ShopCategoryScreen = () => {
               paddingVertical: 5,
             }}
           >
-            <Text>{item.name}</Text>
+            <Text> {item.name}</Text>
             <View style={{ flexDirection: "row" }}>
               <TouchableOpacity
                 onPress={() => handleEditCategory(item.id, item.name)}

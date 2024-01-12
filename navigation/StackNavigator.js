@@ -279,7 +279,11 @@ const StackNavigator = () => {
           headerTitleAlign: "center"
         }}
         />
-        <Stack.Screen name="ShopCategory" component={ShopCategoryScreen} />
+        <Stack.Screen name="ShopCategory" component={ShopCategoryScreen} options={{
+          headerTitle: "Quản lý danh mục cửa hàng",          
+          headerTitleAlign: "center"
+        }}
+        />
 
       </Stack.Navigator>
     </NavigationContainer>
