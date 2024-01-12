@@ -38,6 +38,7 @@ const OTPScreen = ({ navigation, route }) => {
       if (!userDoc.exists) {
         await userRef.set({
           name: "User",
+          seller: false,
           mobileNo: verificationId.phoneNumber, 
           photo: "https://icon2.cleanpng.com/20180514/xvw/kisspng-exotel-cloud-communications-privacy-policy-interac-5afa0479ea45a9.7590282815263345859596.jpg"
         });

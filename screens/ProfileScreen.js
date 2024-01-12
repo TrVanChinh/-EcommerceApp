@@ -74,12 +74,27 @@ const ProfileScreen = ({ navigation }) => {
     const docSnap = await getDoc(docRef);
     setDataUser(docSnap.data());
   };
-  const handleLogout = () => {
+  const handleLogout = async () => {
     updateUser(null);
     setLogin(null);
     setDataUser(null)
     navigation.navigate("Profile");
   };
+
+  // const handleLogout = async () => {
+  //   try {
+  //     await auth().signOut();
+  //     updateUser(null);
+  //     setLogin(null);
+  //     setDataUser(null);
+  
+  //     // Chuyển hướng trang (nếu cần)
+  //     navigation.navigate("Profile");
+  //   } catch (error) {
+  //     console.error('Lỗi khi đăng xuất:', error);
+  //   }
+  // };
+
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

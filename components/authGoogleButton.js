@@ -82,6 +82,7 @@ const authGoogleButton = ({ onLoginSuccess }) => {
         name: currentUser.displayName,
         email: currentUser.email,
         photo: currentUser.photoURL || null,
+        seller: false
       });
       }  
       onLoginSuccess(userCredential);

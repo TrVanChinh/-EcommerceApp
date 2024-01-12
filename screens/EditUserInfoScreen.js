@@ -24,66 +24,50 @@ import { Button } from "react-native-elements";
 import color from "../components/color";
 import { FontAwesome5 } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { useUser } from '../UserContext';
 import auth from '@react-native-firebase/auth';
-
+import { FirebasePhoneAuth } from '@react-native-firebase/auth';
 
 const EditUserInfoScreen = ({ navigation, route }) => {
-  const { user } = useUser();
-  // console.log("pass",user.user.email)
   const { idUser: idUser } = route.params;
   const [avatar, setAvatar] = useState("");
   const [userData, setUser] = useState(null);
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [mobileNo, setMobileNo] = useState("");
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("")
-  // console.log(idUser)
 
+  const currentUser = auth().currentUser;
+  console.log("currentUser",currentUser)
   const db = getFirestore(app);
+
+  // auth().onAuthStateChanged((user) => {
+  //   if (user) {
+  //     console.log("currentUser ss", user);
+  //   } else {
+  //     console.log("currentUser ss", null);
+  //   }
+  // });
   useEffect(() => {
-    fetchUserData()
     getUserData();
   }, []);
 
-
-  const fetchUserData = async() => {
-    try {
-      const userRecord = await auth().getUser(idUser);
-  
-      console.log("Successfully fetched user data:", userRecord);
-  
-      // Truy cập các thuộc tính của userRecord
-      console.log("User UID:", userRecord.uid);
-      console.log("User email:", userRecord.email);
-      console.log("User displayName:", userRecord.displayName);
-      // ...
-    } catch (error) {
-      console.log('Error fetching user data:', error);
-    }
-  }
-
-  // Update state inside the useEffect when data is fetched
   useEffect(() => {
     if (userData) {
       setName(userData.name);
       setAddress(userData.address);
       setEmail(userData.email);
-      setPhoneNumber(userData.mobileNo);
+      setMobileNo(userData.mobileNo);
       setAvatar(userData.photo);
-      setPassword(userData.password)
       //avatar gg = https://lh3.googleusercontent.com/a/ACg8ocJqThobPEndy9LkFEa0Dafe3pgnkZlr41UjDT3bKIUb_oU=s96-c
     }
   }, [userData]);
 
   useEffect(() => {
     // Log giá trị mới của loaiHangImg sau mỗi lần cập nhật
-    console.log(avatar);
+    // console.log(avatar);
   }, [avatar]);
-
-
 
   const getUserData = async () => {
     try {
@@ -100,113 +84,109 @@ const EditUserInfoScreen = ({ navigation, route }) => {
 
   const updateUser = async () => {
     try {
-      if (name == "" || email =="" || password == "" || phoneNumber == "") {
+      if (name == "" || email =="" || password == "" || mobileNo == "") {
         alert( "Không được để trống");
         return;
       }
-  
       setLoading(true);
   
       const userDocRef = doc(db, "user", idUser);
       const userDocSnapshot = await getDoc(userDocRef);
       const updateData = {
-        name: name, // Cập nhật giá trị của trường name
+        name: name, 
       };
-      // Kiểm tra xem trường email đã tồn tại trong dữ liệu của tài liệu hay chưa
       if (!userDocSnapshot.data().hasOwnProperty("email")) {
-        // Nếu không tồn tại, thêm mới trường email
         updateData.email = email;
       }
-  
-      if (!userDocSnapshot.data().hasOwnProperty("password")) {
-        updateData.password = password;
-      } else {
-        updateData.password = password;
-      }
-  
+      // if (!userDocSnapshot.data().hasOwnProperty("password")) {
+      //   updateData.password = password;
+      // } else {
+      //   updateData.password = password;
+      // }
       if (!userDocSnapshot.data().hasOwnProperty("mobileNo")) {
-        updateData.mobileNo = phoneNumber;
+        updateData.mobileNo = mobileNo;
       } else {
-        updateData.mobileNo = phoneNumber;
+        updateData.mobileNo = mobileNo;
       }
       await updateDoc(userDocRef, updateData);
-      alert("Cập nhật thành công");
-    } catch (e) {
-      console.error(e);
+      try {
+        // if (email !== currentUser.email) {
+        //   await updateEmail(currentUser, email);
+        //   await sendEmailVerification(currentUser);
+        // }
+        //   else {
+        //     Alert.alert("Thông báo", "Cập nhật thành công");
+        // }
+        // Cập nhật password nếu tồn tại
+        if (password && password !== "") {
+          await currentUser.updatePassword(password);
+        }
+        // Kiểm tra và cập nhật số điện thoại nếu không tồn tại
+        updatePhoneNumberAuth(mobileNo)
+
+      } catch (error) {
+        Alert.alert("Thông báo lỗi",error)
+      }
+      alert("Cập nhật thành công")
+      navigation.navigate("Main")
+      // setLoading(false)
+    } catch (error) {
+      console.error('Lỗi khi cập nhật thông tin người dùng:', error);
+      Alert.alert("Thông báo lỗi", error.message);
     } finally {
       setLoading(false);
     }
   };
   
+const sendEmailVerification = async (user) => {
+  try {
+    await user.sendEmailVerification();
+  } catch (error) {
+    console.error('Lỗi khi gửi xác nhận email:', error);
+    Alert.alert("Thông báo lỗi", error.message); 
+  }
+};
 
-// const updateUser = async () => {
+// const updatePhoneNumberAuth = async(mobileNo) => {
 //   try {
-//     if (name === "" || email === "" || password === "" || phoneNumber === "") {
-//       Alert.alert("Thông báo", "Không được để trống");
-//     } else {
-//       setLoading(true);
-
-//       const userDocRef = doc(db, "user", idUser);
-//       const userDocSnapshot = await getDoc(userDocRef);
-
-//       // Kiểm tra xem trường email đã tồn tại trong document hay chưa
-//       if (!userDocSnapshot.exists("email")) {
-//         // Nếu không tồn tại, thêm mới trường email
-//         await updateDoc(userDocRef, { email: email });
-//       }
-
-//       // Kiểm tra xem trường password đã tồn tại trong document hay chưa
-//       if (!userDocSnapshot.exists("password")) {
-//         // Nếu không tồn tại, thêm mới trường password
-//         await updateDoc(userDocRef, { password: password });
-//       }
-
-//       // Kiểm tra xem trường mobile đã tồn tại trong document hay chưa
-//       if (!userDocSnapshot.exists("mobileNo")) {
-//         // Nếu không tồn tại, thêm mới trường mobileNo
-//         await updateDoc(userDocRef, { mobileNo: phoneNumber });
-//       }
-
-//       // Cập nhật thông tin trong Authentication
-//       dataUser = user.user
-//       console.log("dataUser", dataUser)
-//       // Cập nhật email
-//       if (!dataUser.email) {
-//         await updateEmail(dataUser, email);
-//       }
-
-//       // Cập nhật password nếu tồn tại
-//       if (password !== "") {
-//         await updatePassword(dataUser, password);
-//       }
-
-//       // Kiểm tra và cập nhật số điện thoại nếu không tồn tại
-//       if (!dataUser.phoneNumber) {
-//         await updatePhoneNumber(dataUser, phoneNumber);
-//       }
-
-//       setLoading(false);
-
-//       // Gửi email xác nhận
-//       if (email !== user.email) {
-//         await sendEmailVerification(user);
-//         Alert.alert("Thông báo", "Vui lòng kiểm tra email và xác nhận địa chỉ email của bạn.");
-//       } else {
-//         Alert.alert("Thông báo", "Cập nhật thành công");
-//       }
+//     // Kiểm tra và cập nhật số điện thoại nếu không tồn tại
+//     if (!currentUser.phoneNumber) {
+//       const confirmationResult = await auth().currentUser.linkWithPhoneNumber(
+//         mobileNo,
+//         false
+//       );
+//       // Thực hiện xác nhận ngay lập tức bằng cách sử dụng mã xác nhận
+//       const verificationCode = '123456'; // Điền mã xác nhận bạn nhận được
+//       const credential = auth.PhoneAuthProvider.credential(confirmationResult.verificationId, verificationCode);
+//       await auth().currentUser.updatePhoneNumber(credential);
+//       // Cập nhật thành công
+//       console.log('Số điện thoại đã được liên kết và xác nhận thành công');
 //     }
-//   } catch (e) {
-//     console.error(e);
-//   }
-// };
-
-// const sendEmailVerification = async (user) => {
-//   try {
-//     await sendEmailVerification(user);
+//     else { 
+      
+//     }
 //   } catch (error) {
-//     console.error(error);
+//     console.error('Lỗi khi liên kết và xác nhận số điện thoại:', error);
 //   }
-// };
+// }
+
+const updatePhoneNumberAuth = async (mobileNo) => {
+  try {
+    if (currentUser && !currentUser.phoneNumber) {
+      const confirmationResult = await auth().signInWithPhoneNumber(mobileNo);
+
+      // Thực hiện xác nhận ngay lập tức bằng cách sử dụng mã xác nhận
+      const verificationCode = '111111'; // Điền mã xác nhận bạn nhận được
+      const credential = auth.PhoneAuthProvider.credential(confirmationResult.verificationId, verificationCode);
+      await currentUser.updatePhoneNumber(credential);
+
+      // Cập nhật thành công
+      console.log('Số điện thoại đã được liên kết và xác nhận thành công');
+    }
+  } catch (error) {
+    console.error('Lỗi khi liên kết và xác nhận số điện thoại:', error);
+  }
+}
 
 
   const changeAvatar = async () => {
@@ -295,7 +275,6 @@ const EditUserInfoScreen = ({ navigation, route }) => {
     }
   };
   
-
   const extractFileName = (url) => {
     const parts = url.split("%2F");
     const fileNameWithQuery = parts[parts.length - 1];
@@ -361,38 +340,53 @@ const EditUserInfoScreen = ({ navigation, route }) => {
           </View>
           <TextInput style={styles.input} onChangeText={setName} value={name} />
         </View>
-        {/* <View style={styles.list_items}>
+
+        { userData?.email ? (<View style={styles.list_items}>
           <View style={{ flexDirection: "row" }}>
-            <Text style={{ marginLeft: 10, fontSize: 16 }}>Địa chỉ</Text>
+            <Text style={{ marginLeft: 10, fontSize: 16 }}>Email</Text>
             <Text style={{ color: "red" }}>*</Text>
           </View>
-          <TextInput
-            style={styles.input}
-            onChangeText={setAddress}
-            value={address}
-          />
-        </View> */}
-        
-        <View style={styles.list_items}>
+          <Text style={styles.input}>{email}</Text>
+        </View>
+        ) : (
+          <View style={styles.list_items}>
           <View style={{ flexDirection: "row" }}>
             <Text style={{ marginLeft: 10, fontSize: 16 }}>Email</Text>
             <Text style={{ color: "red" }}>*</Text>
           </View>
           <TextInput style={styles.input} onChangeText={setEmail} value={email} />
         </View>
+        )}
+        
+        { userData?.mobileNo ? (<View style={styles.list_items}>
+          <View style={{ flexDirection: "row" }}>
+            <Text style={{ marginLeft: 10, fontSize: 16 }}>Số điện thoại</Text>
+            <Text style={{ color: "red" }}>*</Text>
+          </View>
+          <Text style={styles.input}>{userData.mobileNo}</Text>
+        </View>
+        ) : (
+          <View style={styles.list_items}>
+          <View style={{ flexDirection: "row" }}>
+            <Text style={{ marginLeft: 10, fontSize: 16 }}>Số điện thoại</Text>
+            <Text style={{ color: "red" }}>*</Text>
+          </View>
+          <TextInput style={styles.input} onChangeText={setMobileNo} value={mobileNo} />
+        </View>
+        )}
 
-        <View style={styles.list_items}>
+        {/* <View style={styles.list_items}>
           <View style={{ flexDirection: "row" }}>
             <Text style={{ marginLeft: 10, fontSize: 16 }}>Số điện thoại</Text>
             <Text style={{ color: "red" }}>*</Text>
           </View>
           <TextInput
               style={styles.input}
-              onChangeText={setPhoneNumber}
-              value={phoneNumber}
+              onChangeText={setMobileNo}
+              value={mobileNo}
               placeholder="+84"
             />
-        </View>
+        </View> */}
         
         <View style={styles.list_items}>
           <View style={{ flexDirection: "row" }}>

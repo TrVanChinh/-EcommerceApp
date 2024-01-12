@@ -62,7 +62,7 @@ const SearchScreen = ({ navigation, route }) => {
     return str
       .toLowerCase()
       .normalize("NFD") // Chuẩn hóa dấu
-      // .replace(/[\u0300-\u036f]/g, ""); // Loại bỏ dấu
+      .replace(/[\u0300-\u036f]/g, ""); // Loại bỏ dấu
   }
 
   const fetchData = async () => {
@@ -166,6 +166,36 @@ const SearchScreen = ({ navigation, route }) => {
       return priceB - priceA;
     });
   };
+
+    const sortProductsBySold = (products) => {
+      const sortProductsBySold = products.sort((a, b) => {
+        const soldA = parseInt(a.data.sold, 10);
+        const soldB = parseInt(b.data.sold, 10);
+        return soldB - soldA;
+      });
+      // In ra mảng đã sắp xếp
+    setProduct(sortProductsBySold);
+    setUpdateTrigger(prevState => !prevState);
+    };
+
+  // Sắp xếp sản phẩm bán chạy nhất
+  // const sortProductsBySold = (products) => {
+  //   return products.sort((a, b) => {
+  //     const soldA = parseInt(a.data.slod, 10);
+  //     const soldB = parseInt(b.data.slod, 10);
+  
+  //     // Sử dụng điều kiện kiểm tra để xử lý trường hợp 'sold' bằng 0 hoặc giá trị bằng nhau
+  //     if (soldA === soldB) {
+  //       // Nếu giá trị 'sold' bằng nhau, sử dụng thuộc tính 'name' để sắp xếp
+  //       const nameA = a.data.name || '';
+  //       const nameB = b.data.name || '';
+  //       return nameA.localeCompare(nameB);
+  //     } else {
+  //       // Sắp xếp theo giá trị 'sold' giảm dần
+  //       return soldB - soldA;
+  //     }
+  //   });
+  // };
 
   // Sắp xếp mảng theo điều kiện atCreate từ mới nhất đến cũ nhất
   const sortByCreatedAt = (products) => {
@@ -291,7 +321,6 @@ const SearchScreen = ({ navigation, route }) => {
           paddingHorizontal: 10,
         }}
       >
-
       </View> */}
         <View
           style={{
@@ -305,7 +334,9 @@ const SearchScreen = ({ navigation, route }) => {
           >
             <Text style={{ color: color.origin }}>Mới nhất</Text>
           </Pressable>
-          <Pressable style={styles.buttonArrange}>
+          <Pressable style={styles.buttonArrange}
+            onPress={() => sortProductsBySold(product)}
+          >
             <Text style={{ color: color.origin }}>Bán chạy</Text>
           </Pressable>
           {arrange ? (

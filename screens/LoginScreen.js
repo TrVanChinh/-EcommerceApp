@@ -19,6 +19,7 @@ import { useUser } from '../UserContext';
 import { doc, getDoc, getFirestore, updateDoc, setDoc , getDocs, collection } from "firebase/firestore";
 import { db } from "../firebase";
 
+
 const LoginScreen = ({navigation}) => {
   const { updateUser} = useUser();
   const [inputValue, setInputValue] = useState("");
@@ -73,7 +74,21 @@ const LoginScreen = ({navigation}) => {
   //     setLoading(false);
   //   }
   // };
+  const loginWithEmailAndPassword = async () => {
   
+      if ( password == "" || inputValue == "") {
+        alert( "Không được để trống");
+        return;
+      } 
+      try {
+        const userCredential = await auth().signInWithEmailAndPassword(inputValue, password);
+        const user = userCredential.user;
+        console.log('Đăng nhập thành công:', userCredential);
+        onLoginSuccess(userCredential)
+      } catch (error) {
+        console.error('Lỗi khi đăng nhập:', error);
+      }
+  };
 
   return (
     <SafeAreaView style={{ width: "100%", alignItems: "center" }}>
@@ -86,7 +101,7 @@ const LoginScreen = ({navigation}) => {
       <View style={{ width: "90%", top: 30 }}>
         <KeyboardAvoidingView behavior="padding">
           <Input
-            placeholder="Số điện thoại / email"
+            placeholder="Email"
             onChangeText={(text) => setInputValue(text)}
             value={inputValue}
             leftIcon={<SimpleLineIcons name="user" size={24} color="#857E7C" />}
@@ -95,7 +110,7 @@ const LoginScreen = ({navigation}) => {
                 <AntDesign
                   name="close"
                   size={24}
-                  color="black"
+                  color="#857E7C"
                   onPress={clearInput}
                 />
               ) : null
@@ -119,13 +134,13 @@ const LoginScreen = ({navigation}) => {
         </KeyboardAvoidingView>
         <TouchableOpacity
           style={{
-            backgroundColor: inputValue.length & password.length> 0 ? "#F1582C" : "lightgray",
+            backgroundColor: inputValue.length > 0 & password.length > 0 ? "#F1582C" : "lightgray",
             padding: 12,
             alignItems: "center",
           }}
           disabled={inputValue.length === 0}
           onPress={() => {
-            loginUser()
+            loginWithEmailAndPassword()
           }}
         >
           <Text style={{ color: inputValue.length > 0 ? "white" : "#857E7C" }}>

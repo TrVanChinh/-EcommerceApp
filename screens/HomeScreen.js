@@ -263,59 +263,8 @@ const HomeScreen = ({ navigation }) => {
             <View>
                 <Text style={{ color:'red', fontWeight:"bold", padding:20}}>FLASH SALE</Text>
             </View>
-            <View style = {{height: 250}}>          
-                <FlatList 
-                    horizontal  
-                    style={{ flex: 1}}
-                    keyExtractor={item => item.url}
-                    data={product}
-                    renderItem={({item}) => {
-                        return <TouchableOpacity
-                                    onPress={() => {
-                                        alert(`press ${item.price}`)
-                                    }}
-                                    style = {{ 
-                                        justifyContent:'center',
-                                        alignItems:'center'
-                                    }}
-                                >
-                                <View>
-                                    <Image
-                                        style={{
-                                            width: 200,
-                                            height: 200,
-                                            resizeMode: 'cover',
-                                            borderRadius: 25,
-                                            margin: 10,
-                                        }}
-                                        source={{
-                                            uri: item.url
-                                        }}
-                                        />
-                                    <View style={{
-                                            width: 50,
-                                            position:"absolute",
-                                            marginTop: 20,
-                                            alignItems: 'flex-end', 
-                                            backgroundColor: 'red'
-                                        }}>
-                                        <Text style={{color:'yellow'}}>{item.sale}</Text>
-                                    </View>
-                                </View>    
-                                <View style={{ width: 200, paddingBottom:10}}>
-                                <Text style={{fontSize: 18, color:'black'}} numberOfLines={1}>{item.name}</Text>
-                                    <Text style={{ textAlign: "center",fontSize: 20, color:'red'}}>{item.price}</Text>
-                                </View>
-                        </TouchableOpacity>
-                    }}
-                >
-                </FlatList>
-            </View>
-            <View>
-                <Text style={{ color:'red', fontWeight:"bold", padding:20}}>GỢI Ý HÔM NAY</Text>
-            </View>
-            <View style = {{height: 250}}>          
-                <FlatList 
+            <View style = {{height: 250}}>  
+            <FlatList 
                     horizontal  
                     style={{ flex: 1}}
                     keyExtractor={item => item.id}
@@ -354,8 +303,61 @@ const HomeScreen = ({ navigation }) => {
                                     </View>
                                 </View>    
                                 <View style={{ width: 200, alignItems:'center', paddingBottom:10}}>
-                                    <Text style={{fontSize: 18, color:'black'}} numberOfLines={1}>{item.data.name}</Text>
+                                    <Text style={{fontSize: 16, color:'black'}} numberOfLines={1}>{item.data.name}</Text>
                                     <Text style={{ textAlign: "center",fontSize: 18, color:'red'}}>{item.data.price}đ</Text>
+                                </View>
+                        </TouchableOpacity>
+                    }}
+                >
+                </FlatList>
+                    
+                
+            </View>
+            <View>
+                <Text style={{ color:'red', fontWeight:"bold", padding:20}}>GỢI Ý HÔM NAY</Text>
+            </View>
+            <View style = {{height: 250}}>          
+            <FlatList 
+                    horizontal  
+                    style={{ flex: 1}}
+                    keyExtractor={item => item.url}
+                    data={product}
+                    renderItem={({item}) => {
+                        return <TouchableOpacity
+                                    onPress={() => {
+                                        alert(`press ${item.price}`)
+                                    }}
+                                    style = {{ 
+                                        justifyContent:'center',
+                                        alignItems:'center'
+                                    }}
+                                >
+                                <View>
+                                    <Image
+                                        style={{
+                                            width: 200,
+                                            height: 200,
+                                            resizeMode: 'cover',
+                                            borderRadius: 25,
+                                            margin: 10,
+                                        }}
+                                        source={{
+                                            uri: item.url
+                                        }}
+                                        />
+                                    <View style={{
+                                            width: 50,
+                                            position:"absolute",
+                                            marginTop: 20,
+                                            alignItems: 'flex-end', 
+                                            backgroundColor: 'red'
+                                        }}>
+                                        <Text style={{color:'yellow'}}>{item.sale}</Text>
+                                    </View>
+                                </View>    
+                                <View style={{ width: 200, paddingBottom:10}}>
+                                <Text style={{fontSize: 16, color:'black'}} numberOfLines={1}>{item.name}</Text>
+                                    <Text style={{ textAlign: "center",fontSize: 20, color:'red'}}>{item.price}</Text>
                                 </View>
                         </TouchableOpacity>
                     }}
