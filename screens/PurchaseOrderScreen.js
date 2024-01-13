@@ -393,6 +393,7 @@ import {
         </View>
         <ScrollView> 
         {  menu === 'Chờ xác nhận' ? (
+          <ScrollView>
           <View style={{ marginHorizontal: 10 }}>
             {order ? (
                 <>
@@ -468,6 +469,7 @@ import {
                 </View>
               )} 
           </View>
+          </ScrollView>
         ) : menu === 'đang vận chuyển' ? (
           <View style={{ marginHorizontal: 10 }}>
             {deliveringOrder ? (
@@ -679,7 +681,6 @@ import {
               )} 
           </View>
         )}
-
         </ScrollView>
       </View>
     );
