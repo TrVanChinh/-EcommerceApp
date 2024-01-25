@@ -148,6 +148,8 @@ const LoginScreen = ({navigation}) => {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity style={{ marginTop: 20, alignItems:'flex-end'}} onPress={() => navigation.navigate('SmsLogin')}>
+        {/* <TouchableOpacity style={{ marginTop: 20, alignItems:'flex-end'}} onPress={() => navigation.navigate('SMSLoginTest')}> */}
+
           <Text style={{ color:"blue"}}>Đăng nhập bằng SMS</Text>
         </TouchableOpacity>
         <View style={{ flexDirection: "row", alignItems: 'center', marginVertical: 20 }}>

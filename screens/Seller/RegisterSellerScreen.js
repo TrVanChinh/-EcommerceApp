@@ -128,7 +128,7 @@ const RegisterSellerScreen = ({ navigation, route }) => {
       </View>
 
       <View style={{}}>
-        <Button title="Đăng kí" color={color.origin} onPress={setToSeller} />
+        <Button title="Đăng ký" color={color.origin} onPress={setToSeller} />
       </View>
       {loading && (
         <View style={styles.loadingContainer}>

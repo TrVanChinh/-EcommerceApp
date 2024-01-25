@@ -38,6 +38,9 @@ import ShopInfoScreen from "../screens/Seller/ShopInfoScreen";
 import ShopOrdersScreen from "../screens/Seller/ShopOrdersScreen";
 import OrderItemScreen from "../screens/Seller/OrderItemScreen";
 import ShopCategoryScreen from "../screens/Seller/ShopCategoryScreen";
+import SMSLoginTest from "../screens/SMSLoginTest";
+import UpdatePasswordScreen from "../screens/UpdatePasswordScreen";
+import UpdatePhoneNumberScreen from "../screens/UpdatePhoneNumberScreen";
 const StackNavigator = () => {
   const Stack = createNativeStackNavigator();
   const Tab = createBottomTabNavigator();
@@ -198,9 +201,9 @@ const StackNavigator = () => {
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Home" component={HomeScreen} options={{headerShown:false}}/>
         <Stack.Screen name="Login" component={LoginScreen} options={{headerTitle: 'Đăng nhập'}}/>
-        <Stack.Screen name="SmsLogin" component={SmsLoginScreen}/>
+        <Stack.Screen name="SmsLogin" component={SmsLoginScreen} options={{headerTitle: 'Đăng nhập'}}/>
         <Stack.Screen name="Register" component={RegisterScreen} options={{headerTitle: 'Đăng ký'}}/>
-        <Stack.Screen name="OTPScreen" component={OTPScreen} />
+        <Stack.Screen name="OTPScreen" component={OTPScreen} options={{headerTitle: 'Xác thực OTP'}}/>
         <Stack.Screen name="Detail" component={DetailScreen} options={{headerShown:false}}/>
         <Stack.Screen name="Search" component={SearchScreen} options={{headerShown:false}}/>
         <Stack.Screen name="Cart" component={CartScreen}  
@@ -227,7 +230,7 @@ const StackNavigator = () => {
         <Stack.Screen name="ShippingUnit" component={ShippingUnitScreen} options={{headerTitle: 'Đơn vị vận chuyển'}}/>
         <Stack.Screen name="Register Seller" component={RegisterSellerScreen}
           options={{
-            headerTitle: "Đăng kí bán hàng",           
+            headerTitle: "Đăng ký bán hàng",           
             headerTitleAlign: "center", 
           }} 
         />
@@ -282,6 +285,18 @@ const StackNavigator = () => {
         <Stack.Screen name="ShopCategory" component={ShopCategoryScreen} options={{
           headerTitle: "Quản lý danh mục cửa hàng",          
           headerTitleAlign: "center"
+        }}
+        />
+         <Stack.Screen name="SMSLoginTest" component={SMSLoginTest} options={{
+          headerTitle: "SMSLogin",          
+        }}
+        />
+        <Stack.Screen name="UpdatePassword" component={UpdatePasswordScreen} options={{
+          headerTitle: "Cập nhật mật khẩu",          
+        }}
+        />
+        <Stack.Screen name="UpdatePhoneNumber" component={UpdatePhoneNumberScreen} options={{
+          headerTitle: "Cập nhật số điện thoại",          
         }}
         />
 
